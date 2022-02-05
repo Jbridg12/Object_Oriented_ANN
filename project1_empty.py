@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+
 """
 For this entire file there are a few constants:
 activation:
@@ -14,11 +15,21 @@ loss:
 # A class which represents a single neuron
 class Neuron:
     #initilize neuron with activation type, number of inputs, learning rate, and possibly with set weights
-    def __init__(self,activation, input_num, lr, weights=None):
-        print('constructor')    
+    def __init__(self, activation, input_num, lr, weights=None):
+        print('constructor')
+        self.activation = activation
+        self.input_num = input_num
+        self.lr = lr
+        self.weights = weights
+
         
     #This method returns the activation of the net
     def activate(self,net):
+        if(activation == 0):    # Linear Activation
+            return 
+        else:                   # Logistic Activation
+            return 
+
         print('activate')   
         
     #Calculate the output of the neuron should save the input and output for back-propagation.   
@@ -41,9 +52,13 @@ class Neuron:
 #A fully connected layer        
 class FullyConnected:
     #initialize with the number of neurons in the layer, their activation,the input size, the leraning rate and a 2d matrix of weights (or else initilize randomly)
-    def __init__(self,numOfNeurons, activation, input_num, lr, weights=None):
+    def __init__(self, numOfNeurons, activation, input_num, lr, weights=None):
         print('constructor') 
-        
+        self.numOfNeurons = numOfNeurons
+        self.activation = activation
+        self.input_num = input_num
+        self.lr = lr
+        self.weights = weights
         
     #calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)      
     def calculate(self, input):
@@ -59,7 +74,14 @@ class FullyConnected:
 class NeuralNetwork:
     #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
     def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
-        print('constructor') 
+        print('constructor')
+        self.numOfLayers = numOfLayers
+        self.numOfNeurons = numOfNeurons
+        self.inputSize = inputSize
+        self.activation = activation
+        self.loss = loss
+        self.lr = lr
+        self.weights = weights
     
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,input):
