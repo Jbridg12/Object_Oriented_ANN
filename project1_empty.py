@@ -20,10 +20,10 @@ class Neuron:
         self.activation = activation
         self.input_num = input_num
         self.lr = lr
-        self.weights = weights
+        self.weights = weights  # is a vector
 
-        self.input = None
-        self.output = None
+        self.input = None   # is a vector bc weights is a vector?
+        self.output = None  # is a vector bc weights is a vector?
 
     # This method returns the activation of the net
     def activate(self, net):
@@ -39,6 +39,21 @@ class Neuron:
 
     # Calculate the output of the neuron should save the input and output for back-propagation.
     def calculate(self, input):
+        """
+        1. multiply i*w
+        2. add i*w + i*w
+        3. apply activation function
+
+        ? assuming we do not need to include a bias in calculation?
+        :param input:
+        :return:
+        """
+        self.input = input
+        mul = np.multiply(self.input, self.weights)
+        net = np.sum(mul)
+
+        self.output = self.activate(net)
+
         print('calculate')
 
     # This method returns the derivative of the activation function with respect to the net
@@ -49,7 +64,7 @@ class Neuron:
     def calcpartialderivative(self, wtimesdelta):
         print('calcpartialderivative') 
     
-    # Simply update the weights using the partial derivatives and the leranring weight
+    # Simply update the weights using the partial derivatives and the learning weight
     def updateweight(self):
         print('updateweight')
 
@@ -107,10 +122,11 @@ class NeuralNetwork:
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         # print('a good place to test different parts of your code')
-        # Testing activate function -- Delete later
-        N = Neuron(1, 2, 2)
-        ret = N.activate(9)
-        print(ret)
+        # Testing calculate function -- Delete later
+        # activation, input_num, lr, weights=None
+        N = Neuron(1, 2, .01, [.15, .2])
+        N.calculate([.05, .1])
+        print(N.output)
 
     elif sys.argv[1] == 'example':
         print('run example from class (single step)')
