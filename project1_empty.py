@@ -22,8 +22,9 @@ class Neuron:
         self.lr = lr
         self.weights = weights  # is a vector
 
+        self.pd_weights = None # vector for backpropogation
         self.input = None   # is a vector bc weights is a vector?
-        self.output = None  # is a vector bc weights is a vector?
+        self.output = None  # is a vector bc weights is a vector? | I think this should be a single value right?
 
     # This method returns the activation of the net
     def activate(self, net):
@@ -58,10 +59,18 @@ class Neuron:
 
     # This method returns the derivative of the activation function with respect to the net
     def activationderivative(self):
+        if self.activation == 0:
+            # d(linear) / d(net) = constant
+            return 1    # I imagine this is just a constant right?
+        elif self.activation == 1:
+            # d(logistic) / d(net) = logistic(net) * 1 - logistic(net)
+            return activate(self.output) * ( 1 - activate(self.output))
+
         print('activationderivative')   
     
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
+
         print('calcpartialderivative') 
     
     # Simply update the weights using the partial derivatives and the learning weight
@@ -79,10 +88,24 @@ class FullyConnected:
         self.input_num = input_num
         self.lr = lr
         self.weights = weights
+
+        # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
+        self.neurons = None
+        for i in range(numOfNeurons):
+            neurons.Add(Neuron(activation, input_num, lr, weights))
         
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
+
+        out = None  # Store output of each neuron in list for feed forward
+
+        # Loop through each neuron and pass all Inputs 
+        for neuron in self.neurons:
+            out.Add(neuron.calculate(input))
+        
         print('calculate') 
+        return out  # Send outputs back to neuralnetwork
+        
 
     # given the next layer's w*delta, should run through the neurons calling calcpartialderivative() for each (with the correct value), sum up its ownw*delta, and then update the wieghts (using the updateweight() method). I should return the sum of w*delta.
     def calcwdeltas(self, wtimesdelta):
@@ -101,17 +124,41 @@ class NeuralNetwork:
         self.loss = loss
         self.lr = lr
         self.weights = weights
+
+        # I imagine we need to instantiate the layers somewhere but writeup doesn't specify so here?
+        self.layers = None
+        for i in range(numOfLayers):
+            layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
-        print('constructor')
+        
+        nextInput = input   # Store list of inputs 
+
+        # Definitely not quite how this should work but just implementing basics
+        for layer in self.layers:
+            nextInput = layer.calculate(nextInput) # Store output of each layer as input into next layer
+
+        return nextInput    # Return last layer's output
+        print('calculate')
         
     # Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self, yp, y):
-        print('calculate')
+        if loss == 0:
+            # Do sum of squares
+            return
+        elif loss == 1:
+            # Do binary cross entropy
+            return
+        print('calculateloss')
     
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
+        if loss == 0:
+            return yp - y
+        elif loss == 1:
+            # Do binary cross entropy deriv 
+            return (yp - y) / (yp * (1 - yp))
         print('lossderiv')
     
     # Given a single input and desired output preform one step of backpropagation (including a forward pass, getting the derivative of the loss, and then calling calcwdeltas for layers with the right values
