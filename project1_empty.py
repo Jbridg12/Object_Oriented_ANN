@@ -64,7 +64,7 @@ class Neuron:
             return 1    # I imagine this is just a constant right?
         elif self.activation == 1:
             # d(logistic) / d(net) = logistic(net) * 1 - logistic(net)
-            return activate(self.output) * ( 1 - activate(self.output))
+            return self.activate(self.output) * ( 1 - self.activate(self.output))
 
         print('activationderivative')   
     
@@ -92,7 +92,7 @@ class FullyConnected:
         # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
         self.neurons = None
         for i in range(numOfNeurons):
-            neurons.Add(Neuron(activation, input_num, lr, weights))
+            self.neurons.Add(Neuron(activation, input_num, lr, weights))
         
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
@@ -128,7 +128,7 @@ class NeuralNetwork:
         # I imagine we need to instantiate the layers somewhere but writeup doesn't specify so here?
         self.layers = None
         for i in range(numOfLayers):
-            layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
+            self.layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
@@ -144,19 +144,19 @@ class NeuralNetwork:
         
     # Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self, yp, y):
-        if loss == 0:
+        if self.loss == 0:
             # Do sum of squares
             return
-        elif loss == 1:
+        elif self.loss == 1:
             # Do binary cross entropy
             return
         print('calculateloss')
     
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
-        if loss == 0:
+        if self.loss == 0:
             return yp - y
-        elif loss == 1:
+        elif self.loss == 1:
             # Do binary cross entropy deriv 
             return (yp - y) / (yp * (1 - yp))
         print('lossderiv')
