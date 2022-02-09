@@ -16,7 +16,7 @@ loss:
 class Neuron:
     #initilize neuron with activation type, number of inputs, learning rate, and possibly with set weights
     def __init__(self, activation, input_num, lr, weights=None):
-        print('constructor')
+        print('Neuron!')
         self.activation = activation
         self.input_num = input_num
         self.lr = lr
@@ -49,17 +49,19 @@ class Neuron:
         :param input:
         :return:
         """
-        self.input = input
+
+        self.input = list(input)
 
         # Append 1 for bias
-        input.append(1)
+        self.input.append(1)
+
+        print(self.weights)
+        print(self.input)
 
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
 
         self.output = self.activate(net)
-
-        print('calculate')
 
     # This method returns the derivative of the activation function with respect to the net
     def activationderivative(self):
@@ -86,29 +88,33 @@ class Neuron:
 class FullyConnected:
     # initialize with the number of neurons in the layer, their activation,the input size, the leraning rate and a 2d matrix of weights (or else initilize randomly)
     def __init__(self, numOfNeurons, activation, input_num, lr, weights=None):
-        print('constructor') 
+        print('Layer!')
         self.numOfNeurons = numOfNeurons
         self.activation = activation
         self.input_num = input_num
         self.lr = lr
-        self.weights = weights
+        self.weights = weights  # TODO: Randomly initialize weights here if weights is None?
+
+        self.input = []
+        self.output = []
 
         # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
-        self.neurons = None
-        # for i in range(numOfNeurons):
-        #     self.neurons.Add(Neuron(activation, input_num, lr, weights))
+        self.neurons = []
+        for i in range(numOfNeurons):
+            self.neurons.append(Neuron(activation, input_num, lr, weights[i]))
+
+        print(f'Neurons in layer: {numOfNeurons}')
         
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
-
-        out = None  # Store output of each neuron in list for feed forward
+        self.input = input
 
         # Loop through each neuron and pass all Inputs 
         for neuron in self.neurons:
-            out.Add(neuron.calculate(input))
-        
-        print('calculate') 
-        return out  # Send outputs back to neuralnetwork
+            neuron.calculate(self.input)
+            self.output.append(neuron.output)
+
+        return self.output  # Send outputs back to neuralnetwork
         
 
     # given the next layer's w*delta, should run through the neurons calling calcpartialderivative() for each (with the correct value), sum up its ownw*delta, and then update the wieghts (using the updateweight() method). I should return the sum of w*delta.
@@ -120,14 +126,17 @@ class FullyConnected:
 class NeuralNetwork:
     # initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
     def __init__(self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights=None):
-        print('constructor')
+        print('Network!')
         self.numOfLayers = numOfLayers
         self.numOfNeurons = numOfNeurons
         self.inputSize = inputSize
         self.activation = activation
         self.loss = loss
         self.lr = lr
-        self.weights = weights  # TODO: randomize weights if weights is None
+        self.weights = weights  # TODO: randomize weights if weights is None. Initialize randomly in layers class?
+
+        self.input = None
+        self.output = None
 
         # I imagine we need to instantiate the layers somewhere but writeup doesn't specify so here?
         # List of numOfLayers Fully Connected elements
@@ -146,15 +155,15 @@ class NeuralNetwork:
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
-        
-        nextInput = input   # Store list of inputs 
+        self.input = input   # Store list of inputs
+        nextInput = self.input
 
         # Definitely not quite how this should work but just implementing basics
         for layer in self.layers:
-            nextInput = layer.calculate(nextInput) # Store output of each layer as input into next layer
+            nextInput = layer.calculate(nextInput)  # Store output of each layer as input into next layer
 
-        return nextInput    # Return last layer's output
-        print('calculate')
+        self.output = nextInput
+        return self.output    # Return last layer's output
         
     # Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self, yp, y):
@@ -206,9 +215,11 @@ if __name__ == "__main__":
         # activation(array with activation for each layer),
         # loss, lr, weights=None
         NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, 0.1, w)
-        print(len(NN.layers))
+
         # "Train" network on input
-        # NN.calculate(x)
+        out = NN.calculate(x)
+        print()
+        print(out)
         
     elif sys.argv[1] == 'and':
         print('learn and')
