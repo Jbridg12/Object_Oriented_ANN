@@ -50,6 +50,10 @@ class Neuron:
         :return:
         """
         self.input = input
+
+        # Append 1 for bias
+        input.append(1)
+
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
 
@@ -91,8 +95,8 @@ class FullyConnected:
 
         # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
         self.neurons = None
-        for i in range(numOfNeurons):
-            self.neurons.Add(Neuron(activation, input_num, lr, weights))
+        # for i in range(numOfNeurons):
+        #     self.neurons.Add(Neuron(activation, input_num, lr, weights))
         
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
@@ -123,12 +127,22 @@ class NeuralNetwork:
         self.activation = activation
         self.loss = loss
         self.lr = lr
-        self.weights = weights
+        self.weights = weights  # TODO: randomize weights if weights is None
 
         # I imagine we need to instantiate the layers somewhere but writeup doesn't specify so here?
-        self.layers = None
+        # List of numOfLayers Fully Connected elements
+        self.layers = []
         for i in range(numOfLayers):
-            self.layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
+            inSize = None
+            if i == 0:
+                # if layer receives from input layer
+                inSize = inputSize
+            else:
+                # if layer is not receiving from input layer, see how many neurons were in previous layer
+                inSize = numOfNeurons[i-1]
+
+            # self.layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
+            self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
@@ -169,17 +183,32 @@ class NeuralNetwork:
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         # print('a good place to test different parts of your code')
-        # Testing calculate function -- Delete later
+        # Testing neuron -- Delete later
         # activation, input_num, lr, weights=None
-        N = Neuron(1, 2, .01, [.15, .2])
+        N = Neuron(1, 2, .01, [.15, .2, .35])
         N.calculate([.05, .1])
         print(N.output)
+
+        # Test fully connected layer -- Delete later
+        # numOfNeurons, activation, input_num, lr, weights=None
+        layer = FullyConnected(2, 1, 2, .01, [.15, .2, .35])
 
     elif sys.argv[1] == 'example':
         print('run example from class (single step)')
         w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
         x = np.array([0.05, 0.1])      # I think he meant =? So changed from x == np.array([0.05, 0.1])
         np.array([0.01, 0.99])
+
+        # Test neural network
+        # numOfLayers(includes hidden and output layers),
+        # numOfNeurons(an array with number for each layer),
+        # inputSize,
+        # activation(array with activation for each layer),
+        # loss, lr, weights=None
+        NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, 0.1, w)
+        print(len(NN.layers))
+        # "Train" network on input
+        # NN.calculate(x)
         
     elif sys.argv[1] == 'and':
         print('learn and')
