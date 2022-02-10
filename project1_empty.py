@@ -77,6 +77,8 @@ class Neuron:
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
 
+        # This needs the partial derivative of the loss func which is currently out of scope. We might need to add a new parameter? Not sure if thats even allowed in this project though
+
         print('calcpartialderivative') 
     
     # Simply update the weights using the partial derivatives and the learning weight
@@ -119,8 +121,19 @@ class FullyConnected:
 
     # given the next layer's w*delta, should run through the neurons calling calcpartialderivative() for each (with the correct value), sum up its ownw*delta, and then update the wieghts (using the updateweight() method). I should return the sum of w*delta.
     def calcwdeltas(self, wtimesdelta):
-        print('calcwdeltas') 
-           
+        sum_wdelta = None
+
+        for i in range(self.numOfNeurons):
+            new_wd = self.neurons[i].calcpartialderivative(wtimesdelta[i])  # Get each neuron's new wtimesdelta
+            self.neurons[i].updateweight()
+
+            if i == 0:
+                sum_wdelta = new_wd                     # If the vector doesnt exist yet, give it the first values
+            else:
+                sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
+            
+            
+        return sum_wdelta           
         
 # An entire neural network
 class NeuralNetwork:
@@ -168,12 +181,19 @@ class NeuralNetwork:
     # Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self, yp, y):
         if self.loss == 0:
-            # Do sum of squares
-            return
+            # Do sum of squares he didnt intend MSE right?
+            sum = 0     # Keep running sum
+            for i in range(len(y)):
+                sum += (y[i] - yp[i]) ** 2  # Square and add to total
+
+            return sum              # This is not MSE so no average
         elif self.loss == 1:
             # Do binary cross entropy
-            return
-        print('calculateloss')
+            sum = 0 
+            for i in range(len(y)):
+                sum += y[i] * np.log(yp[i]) + ((1 - y[i]) * np.log(1-yp[i]))    # np.log is natural log (not sure if we need base10)
+
+            return sum / len(y)     # Online this showed to be an average
     
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
