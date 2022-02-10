@@ -76,10 +76,15 @@ class Neuron:
     
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
+        new_wd = None
 
-        # This needs the partial derivative of the loss func which is currently out of scope. We might need to add a new parameter? Not sure if thats even allowed in this project though
+        # This needs the partial derivative of the loss func which is currently out of scope. Temp using wtimesdelta to pass cause it kinda makes sense. Not sure if thats even allowed in this project though
+        curr_delta = wtimesdelta * self.activationderivative()
 
-        print('calcpartialderivative') 
+        for i in range(self.weights):
+            new_wd.Add(self.weights[i] * curr_delta[i])     # Couldn't quite figure out if curr_delta should be vector or just a scalar given wtimesdelta is supposed to be a vector
+
+        return new_wd 
     
     # Simply update the weights using the partial derivatives and the learning weight
     def updateweight(self):
@@ -124,7 +129,7 @@ class FullyConnected:
         sum_wdelta = None
 
         for i in range(self.numOfNeurons):
-            new_wd = self.neurons[i].calcpartialderivative(wtimesdelta[i])  # Get each neuron's new wtimesdelta
+            new_wd = self.neurons[i].calcpartialderivative(wtimesdelta)  # Get each neuron's new wtimesdelta, not quite sure if the whole vector needs to be passed but it looks like it
             self.neurons[i].updateweight()
 
             if i == 0:
