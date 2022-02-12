@@ -68,13 +68,16 @@ class Neuron:
             return 1    # I imagine this is just a constant right?
         elif self.activation == 1:
             # d(logistic) / d(net) = logistic(net) * 1 - logistic(net)
-            return self.activate(self.output) * ( 1 - self.activate(self.output))
+            print(f'\tOutput: {self.output}')
+            return self.activate(self.output) * (1 - self.activate(self.output))
 
     
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
         new_wd = []
 
+        print(f'Neuron w*delta: {wtimesdelta}')
+        print(f'Activation Deriv: {self.activationderivative()}')
         curr_delta = wtimesdelta * self.activationderivative()
         self.d = curr_delta
 
@@ -126,7 +129,9 @@ class FullyConnected:
     def calcwdeltas(self, wtimesdelta):
         sum_wdelta = []
 
+        print(f'\nNumber of Neurons: {self.numOfNeurons}')
         for i in range(self.numOfNeurons):
+            print(f'\t{wtimesdelta[i]}')
             new_wd = self.neurons[i].calcpartialderivative(wtimesdelta[i])  # Get each neuron's new wtimesdelta, not quite sure if the whole vector needs to be passed but it looks like it
             self.neurons[i].updateweight()
 
@@ -225,10 +230,15 @@ class NeuralNetwork:
         print('First y predicted values: {}'.format(y_test))
         print('Error total: {}'.format(self.calculateloss(y_test, y)))
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
+
         print(f'tmp values: {wtimesdelta}')
         wtimesdelta = [.741, -.217]
+
+        print(f'\nNumber of Layers: {self.numOfLayers}')
         for i in range(self.numOfLayers):
             curr_layer = self.numOfLayers - 1 - i       # Calc index for moving backwards
+            print(curr_layer)
+            print(len(self.layers))
             wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
         
         new_y_test = self.calculate(x)
