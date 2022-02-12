@@ -56,12 +56,8 @@ class Neuron:
         # Append 1 for bias
         self.input.append(1)
 
-        #print(self.weights)
-        #print(self.input)
-
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
-
         
         self.output = self.activate(net)
 
@@ -125,7 +121,6 @@ class FullyConnected:
             self.output.append(neuron.output)
 
         return self.output  # Send outputs back to neuralnetwork
-        
 
     # given the next layer's w*delta, should run through the neurons calling calcpartialderivative() for each (with the correct value), sum up its ownw*delta, and then update the wieghts (using the updateweight() method). I should return the sum of w*delta.
     def calcwdeltas(self, wtimesdelta):
@@ -139,8 +134,7 @@ class FullyConnected:
                 sum_wdelta = new_wd                     # If the vector doesnt exist yet, give it the first values
             else:
                 sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
-            
-            
+
         return sum_wdelta           
         
 # An entire neural network
@@ -205,15 +199,22 @@ class NeuralNetwork:
     
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
+        # print(yp)
+        # print(y)
+        # print(self.numOfNeurons[-1])
+
         pd_loss = []
         if self.loss == 0:
             for i in range(self.numOfNeurons[-1]):
-                pd_loss.append(-1 * (yp[i] - y[i]))        # Current loss derivative set to use
+                # print(f'i: {i}')
+                # print(f'yp({y[i]}) - y({yp[i]})')
+                # print(-1 * (y[i] - yp[i]))
+                pd_loss.append(-1 * (y[i] - yp[i]))        # Current loss derivative set to use
 
         elif self.loss == 1:
             # Do binary cross entropy deriv 
             for i in range(self.numOfNeurons[-1]):
-                pd_loss.append(((1 - y[i])/(1 - yp[i])) - (y[i] / yp[i]))
+                pd_loss.append(((1 - y[i])/(1 - yp[i])) - (y[i] / yp[i]))   # I think this on is correct - From Heather
 
         return pd_loss
     
@@ -224,7 +225,8 @@ class NeuralNetwork:
         print('First y predicted values: {}'.format(y_test))
         print('Error total: {}'.format(self.calculateloss(y_test, y)))
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
-
+        print(f'tmp values: {wtimesdelta}')
+        wtimesdelta = [.741, -.217]
         for i in range(self.numOfLayers):
             curr_layer = self.numOfLayers - 1 - i       # Calc index for moving backwards
             wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
@@ -232,7 +234,6 @@ class NeuralNetwork:
         new_y_test = self.calculate(x)
         print('Round two y predicted: {}'.format(new_y_test))
         print('Error total: {}'.format(self.calculateloss(new_y_test, y)))
-
 
 
 if __name__ == "__main__":
