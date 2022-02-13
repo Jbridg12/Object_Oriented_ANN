@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-
+import random   # Only necessary if random initialized weights
 """
 For this entire file there are a few constants:
 activation:
@@ -11,6 +11,8 @@ loss:
 1 - binary cross entropy
 """
 
+# Global to indicate whether to display weights for example
+SHOW_WEIGHTS = False
 
 # A class which represents a single neuron
 class Neuron:
@@ -19,12 +21,19 @@ class Neuron:
         self.activation = activation
         self.input_num = input_num
         self.lr = lr
-        self.weights = weights  # is a vector
 
         self.d = 0
         self.pd_weights = None # vector for backpropogation
         self.input = None   # is a vector bc weights is a vector?
         self.output = None  # is a vector bc weights is a vector? | I think this should be a single value right?
+
+        # At the individual Neuron level if no weights specified
+        # initialize the weights to random floating point values
+        # in range(0.0 - 1.0)
+        if weights is None:
+            self.weights = [random.random() for i in range(input_num + 1)]
+        else:
+            self.weights = weights  # is a vector
 
     # This method returns the activation of the net
     def activate(self, net):
@@ -47,6 +56,8 @@ class Neuron:
         :param input:
         :return:
         """
+        if SHOW_WEIGHTS is True:
+            print("Weights: {}".format(self.weights))
 
         self.input = list(input)
 
@@ -103,7 +114,10 @@ class FullyConnected:
         # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
         self.neurons = []
         for i in range(numOfNeurons):
-            self.neurons.append(Neuron(activation, input_num, lr, weights[i]))
+            if weights is None:
+                self.neurons.append(Neuron(activation, input_num, lr, weights))
+            else:
+                self.neurons.append(Neuron(activation, input_num, lr, weights[i]))
 
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
@@ -160,7 +174,10 @@ class NeuralNetwork:
                 inSize = numOfNeurons[i-1]
 
             # self.layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
-            self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
+            if weights is None:
+                self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr))
+            else:
+                self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
@@ -216,16 +233,14 @@ class NeuralNetwork:
     def train(self, x, y):
 
         y_test = self.calculate(x)      # One forward pass
-        print('First y predicted values: {}'.format(y_test))
-        print('Error total: {}'.format(self.calculateloss(y_test, y)))
+        
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
 
         for i in range(self.numOfLayers):
             curr_layer = self.numOfLayers - 1 - i       # Calc index for moving backwards
-            wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
+            wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)      
         
         new_y_test = self.calculate(x)
-        print('Round two y predicted: {}'.format(new_y_test))
         print('Error total: {}'.format(self.calculateloss(new_y_test, y)))
 
 
@@ -244,6 +259,8 @@ if __name__ == "__main__":
 
     elif sys.argv[1] == 'example':
         print('run example from class (single step)')
+        SHOW_WEIGHTS = True
+
         w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
         x = np.array([0.05, 0.1])      # I think he meant =? So changed from x == np.array([0.05, 0.1])
         y = np.array([0.01, 0.99])
@@ -255,10 +272,16 @@ if __name__ == "__main__":
         # activation(array with activation for each layer),
         # loss, lr, weights=None
         NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, 0.5, w)
-        
-        # Does not entirely work yet
+
+        y_test = self.calculate(x)      # One forward pass
+        print('First y predicted values: {}'.format(y_test))
+        print('Error total: {}'.format(self.calculateloss(y_test, y)))
+
         NN.train(x, y)
 
+        new_y_test = self.calculate(x)
+        print('Round two y predicted: {}'.format(new_y_test))
+        print('Error total: {}'.format(self.calculateloss(new_y_test, y)))
 
         # "Train" network on input
         # out = NN.calculate(x)
@@ -267,6 +290,21 @@ if __name__ == "__main__":
         
     elif sys.argv[1] == 'and':
         print('learn and')
+        x = np.array([np.array([0,0]), np.array([0,1]), np.array([1,0]), np.array([1,1])])
+        y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])
+
+
+        NN = NeuralNetwork(1, np.array([1]), 2, np.array([1]), 0, 0.5)
+
+        for i in range(25000):
+            train = int(random.random() * 3)
+            NN.train(x[train], y[train])
+
+        print(NN.calculate(x[0]))
+        print(NN.calculate(x[1]))
+        print(NN.calculate(x[2]))
+        print(NN.calculate(x[3]))
+
         
     elif sys.argv[1] == 'xor':
         print('learn xor')
