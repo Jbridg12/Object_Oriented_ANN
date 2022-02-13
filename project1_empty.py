@@ -290,20 +290,34 @@ if __name__ == "__main__":
         
     elif sys.argv[1] == 'and':
         print('learn and')
-        x = np.array([np.array([0,0]), np.array([0,1]), np.array([1,0]), np.array([1,1])])
-        y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])
 
+        x = np.array([np.array([0,0]), np.array([0,1]), np.array([1,0]), np.array([1,1])])  # Store the different input combinations
+        y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])          # Corresponding outputs
+            
+        final_errors = []   # Store errors for future plotting/evaluating
+        alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates 
 
-        NN = NeuralNetwork(1, np.array([1]), 2, np.array([1]), 0, 0.5)
+        for a in alphas:    # Run each learning rate
+            for i in range(2):  # Different activation functions
+                for j in range(2):  # Different Loss functions
 
-        for i in range(25000):
-            train = int(random.random() * 3)
-            NN.train(x[train], y[train])
+                    NN = NeuralNetwork(1, np.array([1]), 2, np.array([i]), 0, a)
 
+                    for z in range(1000):
+                        index = int(random.randint(0,3))    # Randomly pick training sample
+                        NN.train(x[index], y[index])
+
+                    final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
+
+        for e in final_errors:
+            print(e)
+
+        '''
         print(NN.calculate(x[0]))
         print(NN.calculate(x[1]))
         print(NN.calculate(x[2]))
         print(NN.calculate(x[3]))
+        '''
 
         
     elif sys.argv[1] == 'xor':
