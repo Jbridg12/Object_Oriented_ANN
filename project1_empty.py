@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import random   # Only necessary if random initialized weights
+import matplotlib.pyplot as plt
 """
 For this entire file there are a few constants:
 activation:
@@ -66,7 +67,7 @@ class Neuron:
 
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
-        
+
         self.output = self.activate(net)
 
     # This method returns the derivative of the activation function with respect to the net
@@ -106,7 +107,7 @@ class FullyConnected:
         self.activation = activation
         self.input_num = input_num
         self.lr = lr
-        self.weights = weights  # TODO: Randomly initialize weights here if weights is None?
+        self.weights = weights
 
         self.input = []
         self.output = []
@@ -156,7 +157,7 @@ class NeuralNetwork:
         self.activation = activation
         self.loss = loss
         self.lr = lr
-        self.weights = weights  # TODO: randomize weights if weights is None. Initialize randomly in layers class?
+        self.weights = weights
 
         self.input = None
         self.output = None
@@ -200,6 +201,7 @@ class NeuralNetwork:
                 sum += (y[i] - yp[i]) ** 2  # Square and add to total
 
             return sum / len(y)              # This is not MSE so no average
+
         elif self.loss == 1:
             # Do binary cross entropy
             sum = 0 
@@ -207,7 +209,7 @@ class NeuralNetwork:
                 sum += -1 * (y[i] * np.log(yp[i]) + ((1 - y[i]) * np.log(1-yp[i])))    # np.log is natural log (not sure if we need base10)
 
             return sum / len(y)     # Online this showed to be an average
-    
+
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
         # print(yp)
@@ -241,7 +243,38 @@ class NeuralNetwork:
             wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)      
         
         new_y_test = self.calculate(x)
-        print('Error total: {}'.format(self.calculateloss(new_y_test, y)))
+        calc_loss = self.calculateloss(new_y_test, y)
+        print('Error total: {}'.format(calc_loss))
+
+        return y_test, calc_loss
+
+    def train_Heather(self, x, y):
+        y_pred = self.calculate(x)
+
+        wtimesdelta = self.lossderiv(y_pred, y)  # Save partial derivative of the loss as first w times delta
+
+        if self.numOfLayers > 1:
+            for i in range(self.numOfLayers):
+                curr_layer = self.numOfLayers - 1 - i  # Calc index for moving backwards
+                wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
+
+        calc_loss = self.calculateloss(y_pred, y)
+        print('Error total: {}'.format(calc_loss))
+
+        return y_pred, calc_loss
+
+
+def plot_lr(lr_list, labels):
+    for lr in lr_list:
+        print(lr)
+        plt.plot(range(len(lr)), lr)
+
+    plt.legend(labels, loc='upper right')
+    # plt.yticks([0, 1, 2, 3])
+    plt.title('Loss vs. Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -273,15 +306,24 @@ if __name__ == "__main__":
         # loss, lr, weights=None
         NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, 0.5, w)
 
-        y_test = self.calculate(x)      # One forward pass
-        print('First y predicted values: {}'.format(y_test))
-        print('Error total: {}'.format(self.calculateloss(y_test, y)))
+        # y_test = NN.calculate(x)      # One forward pass
+        # print('First y predicted values: {}'.format(y_test))
+        # print('Error total: {}'.format(NN.calculateloss(y_test, y)))
 
-        NN.train(x, y)
+        output, loss = NN.train(x, y)
 
-        new_y_test = self.calculate(x)
-        print('Round two y predicted: {}'.format(new_y_test))
-        print('Error total: {}'.format(self.calculateloss(new_y_test, y)))
+        print(f'Output: {output}, Loss: {loss}')
+        print()
+
+        for i in range(1000):
+            output = NN.train(x, y)
+
+            print(f'Output: {output}, Loss: {loss}')
+            print()
+
+        # new_y_test = self.calculate(x)
+        # print('Round two y predicted: {}'.format(new_y_pred))
+        # print('Error total: {}'.format(NN.calculateloss(new_y_pred, y)))
 
         # "Train" network on input
         # out = NN.calculate(x)
@@ -295,19 +337,35 @@ if __name__ == "__main__":
         y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])          # Corresponding outputs
             
         final_errors = []   # Store errors for future plotting/evaluating
-        alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates 
+        # alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates
+        alphas = [.8, .5, .1, .05]   # Learning rates
+        activation_loss = [[0, 0], [1, 1], [1, 0]]
 
-        for a in alphas:    # Run each learning rate
-            for i in range(2):  # Different activation functions
-                for j in range(2):  # Different Loss functions
+        for al in range(len(activation_loss)):
+            list_of_labels = []
+            list_of_lr = []
+            for a in alphas:  # Run each learning rate
+                # self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights = None
+                NN = NeuralNetwork(1, np.array([1]), 2, np.array([activation_loss[al][0]]), activation_loss[al][1], a)
 
-                    NN = NeuralNetwork(1, np.array([1]), 2, np.array([i]), 0, a)
+                new_lr = []
+                for z in range(1000):
+                    SHOW_WEIGHTS = True
+                    index = int(random.randint(0,3))    # Randomly pick training sample
+                    # print(f'{x[index]}, {y[index]}')
+                    output, loss = NN.train(x[index], y[index])
+                    new_lr.append(loss)
+                list_of_labels.append(f'a={a}')
 
-                    for z in range(1000):
-                        index = int(random.randint(0,3))    # Randomly pick training sample
-                        NN.train(x[index], y[index])
+                print('\n\n')
+                # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
+                list_of_lr.append(new_lr)
+            print()
+            plot_lr(list_of_lr, list_of_labels)
 
-                    final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
+        # print()
+        # plot_lr(list_of_lr, list_of_labels)
+        exit()
 
         for e in final_errors:
             print(e)
