@@ -349,11 +349,11 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(1, np.array([1]), 2, np.array([activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
-                for z in range(1000):
+                for z in range(100):
                     SHOW_WEIGHTS = True
                     index = int(random.randint(0,3))    # Randomly pick training sample
                     # print(f'{x[index]}, {y[index]}')
-                    output, loss = NN.train(x[index], y[index])
+                    output, loss = NN.train(x[1], y[1])
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
 
@@ -377,6 +377,58 @@ if __name__ == "__main__":
         print(NN.calculate(x[3]))
         '''
 
-        
     elif sys.argv[1] == 'xor':
         print('learn xor')
+
+        x = np.array([np.array([0, 0]), np.array([0, 1]), np.array([1, 0]),
+                      np.array([1, 1])])  # Store the different input combinations
+        y = np.array([np.array([0]), np.array([1]), np.array([1]), np.array([0])])  # Corresponding outputs
+
+        final_errors = []  # Store errors for future plotting/evaluating
+        # alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates
+        alphas = [.8, .5, .1, .05]  # Learning rates
+        activation_loss = [[0, 0], [1, 1], [1, 0]]
+
+        # For the first network of a single perceptron
+        for al in range(len(activation_loss)):
+            list_of_labels = []
+            list_of_lr = []
+            for a in alphas:  # Run each learning rate
+                # self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights = None
+                NN = NeuralNetwork(1, np.array([1]), 2, np.array([activation_loss[al][0]]), activation_loss[al][1], a)
+
+                new_lr = []
+                for z in range(100):
+                    SHOW_WEIGHTS = True
+                    index = int(random.randint(0, 3))  # Randomly pick training sample
+                    # print(f'{x[index]}, {y[index]}')
+                    output, loss = NN.train(x[index], y[index])
+                    new_lr.append(loss)
+                list_of_labels.append(f'a={a}')
+
+                print('\n\n')
+                # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
+                list_of_lr.append(new_lr)
+            print()
+            # plot_lr(list_of_lr, list_of_labels)
+
+        # For the second network, add a hidden layer
+        for al in range(len(activation_loss)):
+            list_of_labels = []
+            list_of_lr = []
+            for a in alphas:  # Run each learning rate
+                # self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights = None
+                NN = NeuralNetwork(2, np.array([1, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
+
+                new_lr = []
+                for z in range(100):
+                    SHOW_WEIGHTS = True
+                    index = int(random.randint(0, 3))  # Randomly pick training sample
+                    # print(f'{x[index]}, {y[index]}')
+                    output, loss = NN.train(x[index], y[index])
+                    new_lr.append(loss)
+                list_of_labels.append(f'a={a}')
+
+                list_of_lr.append(new_lr)
+            print()
+            plot_lr(list_of_lr, list_of_labels)
