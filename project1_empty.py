@@ -14,6 +14,9 @@ loss:
 
 # Global to indicate whether to display weights for example
 SHOW_WEIGHTS = False
+EPOCHS = 1000
+losses = ['SumOfSquares', 'BinaryCrossEnt']
+activations = ['Linear', 'Sigmoid']
 
 # A class which represents a single neuron
 class Neuron:
@@ -264,14 +267,15 @@ class NeuralNetwork:
         return y_pred, calc_loss
 
 
-def plot_lr(lr_list, labels):
+def plot_lr(lr_list, labels, l=0, a=0):
     for lr in lr_list:
         print(lr)
         plt.plot(range(len(lr)), lr)
 
+    
     plt.legend(labels, loc='upper right')
     # plt.yticks([0, 1, 2, 3])
-    plt.title('Loss vs. Epochs')
+    plt.title('Loss over {} Epochs; {} activation; {} loss'.format(EPOCHS, activations[a], losses[l]))
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.show()
@@ -349,11 +353,13 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(1, np.array([1]), 2, np.array([activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
-                for z in range(100):
+                for z in range(EPOCHS):
                     SHOW_WEIGHTS = True
                     index = int(random.randint(0,3))    # Randomly pick training sample
                     # print(f'{x[index]}, {y[index]}')
-                    output, loss = NN.train(x[1], y[1])
+                    output, loss = NN.train(x[index], y[index])
+                    if loss > 1:
+                        loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
 
@@ -361,7 +367,7 @@ if __name__ == "__main__":
                 # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
                 list_of_lr.append(new_lr)
             print()
-            plot_lr(list_of_lr, list_of_labels)
+            plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
 
         # print()
         # plot_lr(list_of_lr, list_of_labels)
@@ -385,6 +391,7 @@ if __name__ == "__main__":
         y = np.array([np.array([0]), np.array([1]), np.array([1]), np.array([0])])  # Corresponding outputs
 
         final_errors = []  # Store errors for future plotting/evaluating
+
         # alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates
         alphas = [.8, .5, .1, .05]  # Learning rates
         activation_loss = [[0, 0], [1, 1], [1, 0]]
@@ -398,11 +405,13 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(1, np.array([1]), 2, np.array([activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
-                for z in range(100):
+                for z in range(EPOCHS):
                     SHOW_WEIGHTS = True
                     index = int(random.randint(0, 3))  # Randomly pick training sample
                     # print(f'{x[index]}, {y[index]}')
                     output, loss = NN.train(x[index], y[index])
+                    if loss > 1:
+                        loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
 
@@ -410,7 +419,7 @@ if __name__ == "__main__":
                 # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
                 list_of_lr.append(new_lr)
             print()
-            # plot_lr(list_of_lr, list_of_labels)
+            #plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
 
         # For the second network, add a hidden layer
         for al in range(len(activation_loss)):
@@ -421,14 +430,16 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(2, np.array([1, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
-                for z in range(100):
+                for z in range(EPOCHS):
                     SHOW_WEIGHTS = True
                     index = int(random.randint(0, 3))  # Randomly pick training sample
                     # print(f'{x[index]}, {y[index]}')
                     output, loss = NN.train(x[index], y[index])
+                    if loss > 1:
+                        loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
 
                 list_of_lr.append(new_lr)
             print()
-            plot_lr(list_of_lr, list_of_labels)
+            plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
