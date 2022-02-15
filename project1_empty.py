@@ -14,7 +14,7 @@ loss:
 
 # Global to indicate whether to display weights for example
 SHOW_WEIGHTS = False
-EPOCHS = 1000
+EPOCHS = 3000
 losses = ['SumOfSquares', 'BinaryCrossEnt']
 activations = ['Linear', 'Sigmoid']
 
@@ -427,7 +427,7 @@ if __name__ == "__main__":
             list_of_lr = []
             for a in alphas:  # Run each learning rate
                 # self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights = None
-                NN = NeuralNetwork(2, np.array([1, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
+                NN = NeuralNetwork(2, np.array([3, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
                 for z in range(EPOCHS):
