@@ -27,9 +27,8 @@ class Neuron:
         self.lr = lr
 
         self.d = 0
-        self.pd_weights = None # vector for backpropogation
-        self.input = None   # is a vector bc weights is a vector?
-        self.output = None  # is a vector bc weights is a vector? | I think this should be a single value right?
+        self.input = None   
+        self.output = None  
 
         # At the individual Neuron level if no weights specified
         # initialize the weights to random floating point values
@@ -56,7 +55,7 @@ class Neuron:
         2. add i*w + i*w
         3. apply activation function
 
-        ? assuming we do not need to include a bias in calculation?
+       
         :param input:
         :return:
         """
@@ -77,7 +76,7 @@ class Neuron:
     def activationderivative(self):
         if self.activation == 0:
             # d(linear) / d(net) = constant
-            return 1    # I imagine this is just a constant right?
+            return 1    
         elif self.activation == 1:
             # d(logistic) / d(net) = logistic(net) * 1 - logistic(net)
             return self.output * (1 - self.output)
@@ -92,13 +91,11 @@ class Neuron:
         for i in range(self.input_num + 1):
             new_wd.append( self.weights[i] * curr_delta)
 
-        self.pd_weights = new_wd
         return new_wd 
     
     # Simply update the weights using the partial derivatives and the learning weight
     def updateweight(self):
         for i in range(self.input_num + 1):
-            #self.weights[i] -= self.lr * self.pd_weights[i] * self.input[i]
             self.weights[i] -= self.lr * self.d * self.input[i]
 
 
@@ -115,7 +112,7 @@ class FullyConnected:
         self.input = []
         self.output = []
 
-        # I imagine we need to instantiate the neurons somewhere but writeup doesn't specify so here?
+        # Instantiate all Neurons in the given layer
         self.neurons = []
         for i in range(numOfNeurons):
             if weights is None:
@@ -166,7 +163,6 @@ class NeuralNetwork:
         self.input = None
         self.output = None
 
-        # I imagine we need to instantiate the layers somewhere but writeup doesn't specify so here?
         # List of numOfLayers Fully Connected elements
         self.layers = []
         for i in range(numOfLayers):
@@ -178,7 +174,7 @@ class NeuralNetwork:
                 # if layer is not receiving from input layer, see how many neurons were in previous layer
                 inSize = numOfNeurons[i-1]
 
-            # self.layers.Add(FullyConnected(numOfNeurons, activation, inputSize, lr, weights))
+            
             if weights is None:
                 self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr))
             else:
@@ -189,7 +185,7 @@ class NeuralNetwork:
         self.input = input   # Store list of inputs
         nextInput = self.input
 
-        # Definitely not quite how this should work but just implementing basics
+        
         for layer in self.layers:
             nextInput = layer.calculate(nextInput)  # Store output of each layer as input into next layer
 
@@ -199,39 +195,33 @@ class NeuralNetwork:
     # Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self, yp, y):
         if self.loss == 0:
-            # Do sum of squares he didnt intend MSE right?
+            
             sum = 0     # Keep running sum
             for i in range(len(y)):
                 sum += (y[i] - yp[i]) ** 2  # Square and add to total
 
-            return sum / len(y)              # This is not MSE so no average
+            return sum / len(y)              
 
         elif self.loss == 1:
             # Do binary cross entropy
             sum = 0 
             for i in range(len(y)):
-                sum += -1 * (y[i] * np.log(yp[i]) + ((1 - y[i]) * np.log(1-yp[i])))    # np.log is natural log (not sure if we need base10)
+                sum += -1 * (y[i] * np.log(yp[i]) + ((1 - y[i]) * np.log(1-yp[i])))    # np.log is natural log 
 
             return sum / len(y)     # Online this showed to be an average
 
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
-        # print(yp)
-        # print(y)
-        # print(self.numOfNeurons[-1])
 
         pd_loss = []
         if self.loss == 0:
             for i in range(self.numOfNeurons[-1]):
-                # print(f'i: {i}')
-                # print(f'yp({y[i]}) - y({yp[i]})')
-                # print(-1 * (y[i] - yp[i]))
                 pd_loss.append(-1 * (y[i] - yp[i]))        # Current loss derivative set to use
 
         elif self.loss == 1:
             # Do binary cross entropy deriv 
             for i in range(self.numOfNeurons[-1]):
-                pd_loss.append(((1 - y[i])/(1 - yp[i])) - (y[i] / yp[i]))   # I think this on is correct - From Heather
+                pd_loss.append(((1 - y[i])/(1 - yp[i])) - (y[i] / yp[i]))   
 
         return pd_loss
     
@@ -248,18 +238,15 @@ class NeuralNetwork:
         
         new_y_test = self.calculate(x)
         calc_loss = self.calculateloss(new_y_test, y)
-        # print('Error total: {}'.format(calc_loss))
 
         return y_test, calc_loss
 
 
 def plot_lr(lr_list, labels, l=0, a=0):
     for lr in lr_list:
-        # print(lr)
         plt.plot(range(len(lr)), lr)
 
     plt.legend(labels, loc='upper right')
-    # plt.yticks([0, 1, 2, 3])
     plt.title('Loss over {} Epochs; {} activation; {} loss'.format(EPOCHS, activations[a], losses[l]))
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -268,22 +255,13 @@ def plot_lr(lr_list, labels, l=0, a=0):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        # print('a good place to test different parts of your code')
-        # Testing neuron -- Delete later
-        # activation, input_num, lr, weights=None
-        N = Neuron(1, 2, .01, [.15, .2, .35])
-        N.calculate([.05, .1])
-        print(N.output)
-
-        # Test fully connected layer -- Delete later
-        # numOfNeurons, activation, input_num, lr, weights=None
-        layer = FullyConnected(2, 1, 2, .01, [.15, .2, .35])
+        print('Invlaid input')
 
     elif sys.argv[2] == 'example':
         print('Run example from class (single step).')
 
         w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
-        x = np.array([0.05, 0.1])      # I think he meant =? So changed from x == np.array([0.05, 0.1])
+        x = np.array([0.05, 0.1])      
         y = np.array([0.01, 0.99])
 
         # Test neural network
@@ -306,23 +284,17 @@ if __name__ == "__main__":
         for layer in range(NN.numOfLayers):
             print(f'{NN.layers[layer].weights}')
 
-        # for i in range(1000):
-        #     output = NN.train(x, y)
-        #
-        #     print(f'Output: {output}, Loss: {loss}')
-        #     print()
-        
+
     elif sys.argv[2] == 'and':
-        print('learn and')
 
         x = np.array([np.array([0,0]), np.array([0,1]), np.array([1,0]), np.array([1,1])])  # Store the different input combinations
         y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])          # Corresponding outputs
             
         final_errors = []   # Store errors for future plotting/evaluating
-        # alphas = [1, .8, .5, .1, .05]   # Learning rates
         activation_loss = [[0, 0], [1, 1], [1, 0]]
         alphas = [float(sys.argv[1])]
-
+        
+        print('Training the AND function on a single Neuron...')
         for al in range(len(activation_loss)):
             list_of_labels = []
             list_of_lr = []
@@ -340,10 +312,13 @@ if __name__ == "__main__":
                 list_of_labels.append(f'a={a}')
                 list_of_lr.append(new_lr)
 
+                print('Predicted Values for each input in order [[0,0], [0,1], [1,0], [1,1]]:')
+                print('{}'.format(np.array([NN.calculate(x[0]), NN.calculate(x[1]), NN.calculate(x[2]), NN.calculate(x[3])])))
+
             plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
+        print('Done')
 
     elif sys.argv[2] == 'xor':
-        print('learn xor')
 
         x = np.array([np.array([0, 0]), np.array([0, 1]), np.array([1, 0]),
                       np.array([1, 1])])  # Store the different input combinations
@@ -355,7 +330,7 @@ if __name__ == "__main__":
         # alphas = [.8, .5, .1, .05]  # Learning rates
         activation_loss = [[0, 0], [1, 1], [1, 0]]
         alphas = [float(sys.argv[1])]
-
+        print('Training the XOR function on a single Neuron...')
         # For the first network of a single perceptron
         for al in range(len(activation_loss)):
             list_of_labels = []
@@ -374,9 +349,15 @@ if __name__ == "__main__":
                 list_of_labels.append(f'a={a}')
                 list_of_lr.append(new_lr)
 
+                print('Predicted Values for each input in order [[0,0], [0,1], [1,0], [1,1]]:')
+                print('{}'.format(np.array([NN.calculate(x[0]), NN.calculate(x[1]), NN.calculate(x[2]), NN.calculate(x[3])])))
+
             plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
 
         # For the second network, add a hidden layer
+        
+        print('Single Neuron complete.')
+        print('Now training the XOR function on a network with a hidden layer of 3 Neurons...')
         for al in range(len(activation_loss)):
             list_of_labels = []
             list_of_lr = []
@@ -385,7 +366,6 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(2, np.array([3, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
-                EPOCHS = 10000
                 for z in range(EPOCHS):
                     index = int(random.randint(0, 3))  # Randomly pick training sample
                     output, loss = NN.train(x[index], y[index])
@@ -393,6 +373,11 @@ if __name__ == "__main__":
                         loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
-
                 list_of_lr.append(new_lr)
+
+                print('Predicted Values for each input in order [[0,0], [0,1], [1,0], [1,1]]:')
+                print('{}'.format(np.array([NN.calculate(x[0]), NN.calculate(x[1]), NN.calculate(x[2]), NN.calculate(x[3])])))
+
             plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
+
+        print('Done')
