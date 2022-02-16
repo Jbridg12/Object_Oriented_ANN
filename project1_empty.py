@@ -82,7 +82,6 @@ class Neuron:
             # d(logistic) / d(net) = logistic(net) * 1 - logistic(net)
             return self.output * (1 - self.output)
 
-    
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
         new_wd = []
@@ -101,7 +100,8 @@ class Neuron:
         for i in range(self.input_num + 1):
             #self.weights[i] -= self.lr * self.pd_weights[i] * self.input[i]
             self.weights[i] -= self.lr * self.d * self.input[i]
-        
+
+
 # A fully connected layer
 class FullyConnected:
     # initialize with the number of neurons in the layer, their activation,the input size, the leraning rate and a 2d matrix of weights (or else initilize randomly)
@@ -149,7 +149,8 @@ class FullyConnected:
                 sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
 
         return sum_wdelta           
-        
+
+
 # An entire neural network
 class NeuralNetwork:
     # initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
@@ -247,32 +248,16 @@ class NeuralNetwork:
         
         new_y_test = self.calculate(x)
         calc_loss = self.calculateloss(new_y_test, y)
-        print('Error total: {}'.format(calc_loss))
+        # print('Error total: {}'.format(calc_loss))
 
         return y_test, calc_loss
-
-    def train_Heather(self, x, y):
-        y_pred = self.calculate(x)
-
-        wtimesdelta = self.lossderiv(y_pred, y)  # Save partial derivative of the loss as first w times delta
-
-        if self.numOfLayers > 1:
-            for i in range(self.numOfLayers):
-                curr_layer = self.numOfLayers - 1 - i  # Calc index for moving backwards
-                wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
-
-        calc_loss = self.calculateloss(y_pred, y)
-        print('Error total: {}'.format(calc_loss))
-
-        return y_pred, calc_loss
 
 
 def plot_lr(lr_list, labels, l=0, a=0):
     for lr in lr_list:
-        print(lr)
+        # print(lr)
         plt.plot(range(len(lr)), lr)
 
-    
     plt.legend(labels, loc='upper right')
     # plt.yticks([0, 1, 2, 3])
     plt.title('Loss over {} Epochs; {} activation; {} loss'.format(EPOCHS, activations[a], losses[l]))
@@ -294,9 +279,8 @@ if __name__ == "__main__":
         # numOfNeurons, activation, input_num, lr, weights=None
         layer = FullyConnected(2, 1, 2, .01, [.15, .2, .35])
 
-    elif sys.argv[1] == 'example':
-        print('run example from class (single step)')
-        SHOW_WEIGHTS = True
+    elif sys.argv[2] == 'example':
+        print('Run example from class (single step).')
 
         w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
         x = np.array([0.05, 0.1])      # I think he meant =? So changed from x == np.array([0.05, 0.1])
@@ -308,42 +292,36 @@ if __name__ == "__main__":
         # inputSize,
         # activation(array with activation for each layer),
         # loss, lr, weights=None
-        NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, 0.5, w)
+        NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, float(sys.argv[1]), w)
 
-        # y_test = NN.calculate(x)      # One forward pass
-        # print('First y predicted values: {}'.format(y_test))
-        # print('Error total: {}'.format(NN.calculateloss(y_test, y)))
+        for layer in range(NN.numOfLayers):
+            print(f'{NN.layers[layer].weights}')
 
         output, loss = NN.train(x, y)
 
-        print(f'Output: {output}, Loss: {loss}')
+        print(f'\nOutput: {output}, Loss: {loss}')
         print()
 
-        for i in range(1000):
-            output = NN.train(x, y)
+        print('Weights after 1-step update.')
+        for layer in range(NN.numOfLayers):
+            print(f'{NN.layers[layer].weights}')
 
-            print(f'Output: {output}, Loss: {loss}')
-            print()
-
-        # new_y_test = self.calculate(x)
-        # print('Round two y predicted: {}'.format(new_y_pred))
-        # print('Error total: {}'.format(NN.calculateloss(new_y_pred, y)))
-
-        # "Train" network on input
-        # out = NN.calculate(x)
-        # print()
-        # print(out)
+        # for i in range(1000):
+        #     output = NN.train(x, y)
+        #
+        #     print(f'Output: {output}, Loss: {loss}')
+        #     print()
         
-    elif sys.argv[1] == 'and':
+    elif sys.argv[2] == 'and':
         print('learn and')
 
         x = np.array([np.array([0,0]), np.array([0,1]), np.array([1,0]), np.array([1,1])])  # Store the different input combinations
         y = np.array([np.array([0]), np.array([0]), np.array([0]), np.array([1])])          # Corresponding outputs
             
         final_errors = []   # Store errors for future plotting/evaluating
-        # alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates
-        alphas = [.8, .5, .1, .05]   # Learning rates
+        # alphas = [1, .8, .5, .1, .05]   # Learning rates
         activation_loss = [[0, 0], [1, 1], [1, 0]]
+        alphas = [float(sys.argv[1])]
 
         for al in range(len(activation_loss)):
             list_of_labels = []
@@ -354,36 +332,17 @@ if __name__ == "__main__":
 
                 new_lr = []
                 for z in range(EPOCHS):
-                    SHOW_WEIGHTS = True
                     index = int(random.randint(0,3))    # Randomly pick training sample
-                    # print(f'{x[index]}, {y[index]}')
                     output, loss = NN.train(x[index], y[index])
                     if loss > 1:
                         loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
-
-                print('\n\n')
-                # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
                 list_of_lr.append(new_lr)
-            print()
+
             plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
 
-        # print()
-        # plot_lr(list_of_lr, list_of_labels)
-        exit()
-
-        for e in final_errors:
-            print(e)
-
-        '''
-        print(NN.calculate(x[0]))
-        print(NN.calculate(x[1]))
-        print(NN.calculate(x[2]))
-        print(NN.calculate(x[3]))
-        '''
-
-    elif sys.argv[1] == 'xor':
+    elif sys.argv[2] == 'xor':
         print('learn xor')
 
         x = np.array([np.array([0, 0]), np.array([0, 1]), np.array([1, 0]),
@@ -393,8 +352,9 @@ if __name__ == "__main__":
         final_errors = []  # Store errors for future plotting/evaluating
 
         # alphas = [10, 1, 0.8, 0.5, 0.1, 0.05]   # Learning rates
-        alphas = [.8, .5, .1, .05]  # Learning rates
+        # alphas = [.8, .5, .1, .05]  # Learning rates
         activation_loss = [[0, 0], [1, 1], [1, 0]]
+        alphas = [float(sys.argv[1])]
 
         # For the first network of a single perceptron
         for al in range(len(activation_loss)):
@@ -406,20 +366,15 @@ if __name__ == "__main__":
 
                 new_lr = []
                 for z in range(EPOCHS):
-                    SHOW_WEIGHTS = True
                     index = int(random.randint(0, 3))  # Randomly pick training sample
-                    # print(f'{x[index]}, {y[index]}')
                     output, loss = NN.train(x[index], y[index])
                     if loss > 1:
                         loss = 1
                     new_lr.append(loss)
                 list_of_labels.append(f'a={a}')
-
-                print('\n\n')
-                # final_errors.append([NN.calculate(x[0]),NN.calculate(x[1]),NN.calculate(x[2]),NN.calculate(x[3])])
                 list_of_lr.append(new_lr)
-            print()
-            #plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
+
+            plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
 
         # For the second network, add a hidden layer
         for al in range(len(activation_loss)):
@@ -430,10 +385,9 @@ if __name__ == "__main__":
                 NN = NeuralNetwork(2, np.array([3, 1]), 2, np.array([activation_loss[al][0], activation_loss[al][0]]), activation_loss[al][1], a)
 
                 new_lr = []
+                EPOCHS = 10000
                 for z in range(EPOCHS):
-                    SHOW_WEIGHTS = True
                     index = int(random.randint(0, 3))  # Randomly pick training sample
-                    # print(f'{x[index]}, {y[index]}')
                     output, loss = NN.train(x[index], y[index])
                     if loss > 1:
                         loss = 1
@@ -441,5 +395,4 @@ if __name__ == "__main__":
                 list_of_labels.append(f'a={a}')
 
                 list_of_lr.append(new_lr)
-            print()
             plot_lr(list_of_lr, list_of_labels, activation_loss[al][1], activation_loss[al][0])
