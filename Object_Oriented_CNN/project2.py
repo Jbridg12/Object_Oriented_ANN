@@ -153,17 +153,19 @@ class FullyConnected:
 # An entire neural network
 class NeuralNetwork:
     # initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
-    def __init__(self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights=None):
-        self.numOfLayers = numOfLayers
-        self.numOfNeurons = numOfNeurons
+    # def __init__(self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights=None):
+    def __init__(self, inputSize, loss, lr, weights=None):
+        # self.numOfLayers = numOfLayers
+        # self.numOfNeurons = numOfNeurons
         self.inputSize = inputSize
-        self.activation = activation
+        # self.activation = activation
         self.loss = loss
         self.lr = lr
         self.weights = weights
 
         self.input = None
         self.output = None
+        self.layers = []
 
         # I think this part needs to be taken out from what problem description 1a is saying???
         # List of numOfLayers Fully Connected elements
@@ -182,6 +184,12 @@ class NeuralNetwork:
         #         self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr))
         #     else:
         #         self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
+
+    def addLayer(self):
+        # Input size should be set to the current final layer
+        # I think it is supposed to be like model.add()?
+        # model.add(layers.Conv2D(2,3,input_shape=(7,7,1),activation='sigmoid'))
+        return
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
