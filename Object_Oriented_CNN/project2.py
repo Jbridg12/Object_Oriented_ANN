@@ -3,6 +3,9 @@ import sys
 import random   # Only necessary if random initialized weights
 import matplotlib.pyplot as plt
 import CNN
+from CNN import ConvolutionalLayer
+from CNN import MaxPoolingLayer
+from CNN import FlattenLayer
 
 """
 For this entire file there are a few constants:
@@ -19,6 +22,10 @@ SHOW_WEIGHTS = False
 EPOCHS = 3000
 losses = ['SumOfSquares', 'BinaryCrossEnt']
 activations = ['Linear', 'Sigmoid']
+LINEAR = 0
+SIGMOID = 1
+MSE = 0
+BINARY = 1
 
 # A class which represents a single neuron
 class Neuron:
@@ -154,14 +161,14 @@ class FullyConnected:
 class NeuralNetwork:
     # initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
     # def __init__(self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights=None):
-    def __init__(self, inputSize, loss, lr, weights=None):
+    def __init__(self, inputSize, loss, lr):
         # self.numOfLayers = numOfLayers
         # self.numOfNeurons = numOfNeurons
         self.inputSize = inputSize
         # self.activation = activation
         self.loss = loss
         self.lr = lr
-        self.weights = weights
+        # self.weights = weights
 
         self.input = None
         self.output = None
@@ -185,17 +192,56 @@ class NeuralNetwork:
         #     else:
         #         self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
 
-    def addLayer(self):
+    def addLayer(self, layerType, inputSize=None, numberOfNeurons=None, numberOfKernels=None, sizeOfKernels=None,
+                 activation=None, inputShape=None, weights=None):
+        # (numberOfKernels, sizeOfKernels, activation, inputShape, lr, weights=None)
         # Input size should be set to the current final layer
         # I think it is supposed to be like model.add()?
         # model.add(layers.Conv2D(2,3,input_shape=(7,7,1),activation='sigmoid'))
+        print('Adding layer...')
+        if len(self.layers) == 0:
+            inSize = inputSize
+        else:
+            # I think this is what we are supposed to be getting? "Input size should be set to the current final layer"?
+            inSize = self.layers[len(self.layers)-1].numberOfNeurons
+
+        print(type(layerType))
+        print(layerType)
+        if layerType == "FullyConnected" or layerType == "fullyconnected":
+            if weights is None:
+                self.layers.append(FullyConnected(numberOfNeurons, activation, inSize, self.lr))
+            else:
+                self.layers.append(FullyConnected(numberOfNeurons, activation, inSize, self.lr, weights))
+
+            print('Fully connected layer added.')
+
+        elif layerType == "Conv" or layerType == "conv":
+            print('Convolutional layer added.')
+            if weights is None:
+                self.layers.append(ConvolutionalLayer(numberOfKernels, sizeOfKernels, activation, inputShape, self.lr))
+            else:
+                self.layers.append(ConvolutionalLayer(numberOfKernels, sizeOfKernels, activation, inputShape,
+                                                      self.lr, weights))
+
+        elif layerType == "MaxPool" or layerType == "maxpool":
+            self.layers.append(MaxPoolingLayer(sizeOfKernels, inputShape))
+
+            print('Max pooling layer added.')
+
+        elif layerType == "Flatten" or layerType == "flatten":
+            self.layers.append(FlattenLayer(inSize))
+
+            print('Flatten layer added.')
+
+        else:
+            print('Layer could not be added.')
+
         return
     
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
         self.input = input   # Store list of inputs
         nextInput = self.input
-
         
         for layer in self.layers:
             nextInput = layer.calculate(nextInput)  # Store output of each layer as input into next layer
@@ -268,8 +314,17 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print('Invalid input')
 
-    elif sys.argv[2] == 'example1':
-        print('Run example from class (single step).')
+    elif sys.argv[1] == 'example1':
+        print('Run example1.')
+
+        # run a network with a 5x5 input, one 3x3 convolution layer
+        # with a single kernel, a flatten layer, and single neuron for the output
+        # example2 uses sigmoid, MSE, and learning rate 100
+        NN = NeuralNetwork(5, MSE, 100)
+        print('Initialized')
+        NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID)
+
+        exit()
 
         w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
         x = np.array([0.05, 0.1])      
@@ -295,8 +350,8 @@ if __name__ == "__main__":
         for layer in range(NN.numOfLayers):
             print(f'{NN.layers[layer].weights}')
 
-    elif sys.argv[2] == 'example2':
+    elif sys.argv[1] == 'example2':
         exit()
 
-    elif sys.argv[2] == 'example3':
+    elif sys.argv[1] == 'example3':
         exit()
