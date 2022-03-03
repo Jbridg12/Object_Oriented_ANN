@@ -1,3 +1,6 @@
+from project2 import Neuron
+
+
 class ConvolutionalLayer:
     def __init__(self, numberOfKernels, sizeOfKernels, activation, inputShape, lr, weights=None):
         """
@@ -12,7 +15,13 @@ class ConvolutionalLayer:
         """
         # Each neuron should be a Neuron object.
         # All neurons with the same kernel share the same weights, so MUST BE INITIALIZED WITH THE SAME WEIGHTS
-        exit()
+        self.numberOfKernels = numberOfKernels
+        self.sizeOfKernels = sizeOfKernels
+        self.activation = activation
+        self.inputShape = inputShape
+        self.lr = lr
+        self.weights = weights
+
 
     def calculate(self):
         return
@@ -28,7 +37,8 @@ class MaxPoolingLayer:
         :param sizeOfKernel: Size of the kernel (assume it is a square).
         :param inputShape: Dimension of the inputs
         """
-        exit()
+        self.sizeOfKernel = sizeOfKernel
+        self.inputShape = inputShape
 
     def calculate(self):
         return
