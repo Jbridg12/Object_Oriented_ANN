@@ -54,7 +54,34 @@ class MaxPoolingLayer:
         self.sizeOfKernel = sizeOfKernel
         self.inputShape = inputShape
 
-    def calculate(self):
+        # Store coordinates in a matrix for backpropogation
+        self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel))
+
+    def calculate(self, input):
+        # Create output matrix
+        out = np.empty((self.sizeOfKernel, self.sizeOfKernel))
+
+        # Determine the amount of strides needed
+        move = self.inputShape / self.sizeOfKernel
+
+        # Go over each section by row x column
+        for i in range(move):
+            for j in range(move):
+
+                max = -100  # Arbitrary small value
+                max_coords = None 
+
+                # Loop through each element of the smaller sections
+                for y in range(self.sizeOfKernel):
+                    for x in range(self.sizeOfKernel):
+
+                        # Find the max and store coordinates
+                        if input[y+(i*move)][x+(j*move)] > max:
+                            max = input[y+(i*move)][x+(j*move)]
+                            max_coords = (y+(i*move), x+(j*move))
+
+                out[i][j] = max   # Store max in output
+                self.coords[i][j] = max_coords  # Store coordinates in 
         return
 
     def calculatewdeltas(self, wtimesdelta):
