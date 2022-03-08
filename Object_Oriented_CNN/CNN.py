@@ -37,7 +37,27 @@ class ConvolutionalLayer:
                     self.neurons[i][j][k] = Neuron(activation, sizeOfKernels**2, lr, weights)
 
 
-    def calculate(self):
+    def calculate(self, input):
+        # Define output matrix
+        out = np.empty((self.outputY, self.outputX, self.numberOfKernels))
+
+        # Loop and for each neuron in all channels (This identifies where the kernel is looking)
+        for k in range(self.inputShape[2]):
+            # j is row
+            for j in range(self.outputY):
+                # i is column
+                for i in range(self.outputX):
+                    # Create a matrix to store input X's for each neuron
+                    net = np.empty((self.sizeOfKernels, self.sizeOfKernels))
+
+                    # Then iterate over each relevant element that current kernel is observing
+                    # (This locates the specific element from input in the area of each kernel)
+                    for x in range(self.sizeOfKernels):
+                        for y in range(self.sizeOfKernels):
+                            net[y][x] = input[j*self.sizeOfKernels + y][i*self.sizeOfKernels + x][k]
+                            
+                    # Insert results to the output matrix
+                    out[j][i][k] = self.neurons[j][i][k].calculate(net)
         return
 
     def calculatewdeltas(self, wtimesdelta):
