@@ -1,3 +1,4 @@
+import numpy as np
 from project2 import Neuron
 
 
@@ -112,8 +113,15 @@ class FlattenLayer:
     def __init__(self, inputSize):
         self.inputSize = inputSize
 
-    def calculate(self):
-        return
+    def calculate(self, input):
+        flat = np.copy(input)
+
+        # If size is given as the shape, calculate size in one dimension
+        #flat_size = inputSize[0] * inputSize[1] * inputSize[2]
+        
+        # If size is already 1D simply reshape
+        np.reshape(flat, self.inputSize)
+        return flat
 
     def calculatewdeltas(self, wtimesdelta):
         return
