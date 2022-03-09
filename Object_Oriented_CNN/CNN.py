@@ -27,8 +27,9 @@ class ConvolutionalLayer:
         self.outputX = inputShape[0] - sizeOfKernels + 1
         self.outputY = inputShape[1] - sizeOfKernels + 1
 
-        # Generate same weights
-        weights = np.fill((sizeOfKernels, sizeOfKernels), 0.5)
+        if weights is None:
+            # Generate same weights
+            weights = np.fill((sizeOfKernels, sizeOfKernels), 0.5)
 
 
         self.neurons = np.empty((self.outputX, self.outputY, numberOfKernels))
@@ -76,36 +77,47 @@ class MaxPoolingLayer:
         self.inputShape = inputShape
 
         # Store coordinates in a matrix for backpropogation
-        self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel))
+        self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
 
     def calculate(self, input):
         # Create output matrix
-        out = np.empty((self.sizeOfKernel, self.sizeOfKernel))
+        out = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
 
         # Determine the amount of strides needed
         move = self.inputShape / self.sizeOfKernel
 
-        # Go over each section by row x column
-        for i in range(move):
-            for j in range(move):
+        # For each channel
+        for k in range(self.inputShape[2]):
+            # Go over each section by row x column
+            for i in range(move):
+                for j in range(move):
 
-                max = -100  # Arbitrary small value
-                max_coords = None 
+                    max = -100  # Arbitrary small value
+                    max_coords = None 
 
-                # Loop through each element of the smaller sections
-                for y in range(self.sizeOfKernel):
-                    for x in range(self.sizeOfKernel):
+                    # Loop through each element of the smaller sections
+                    for y in range(self.sizeOfKernel):
+                        for x in range(self.sizeOfKernel):
 
-                        # Find the max and store coordinates
-                        if input[y+(i*move)][x+(j*move)] > max:
-                            max = input[y+(i*move)][x+(j*move)]
-                            max_coords = (y+(i*move), x+(j*move))
+                            # Find the max and store coordinates
+                            if input[y+(i*move)][x+(j*move)] > max:
+                                max = input[y+(i*move)][x+(j*move)][k]
+                                max_coords = (y+(i*move), x+(j*move), k)
 
-                out[i][j] = max   # Store max in output
-                self.coords[i][j] = max_coords  # Store coordinates in 
+                    out[i][j][k] = max   # Store max in output
+                    self.coords[i][j][k] = max_coords  # Store coordinates in 
         return
 
     def calculatewdeltas(self, wtimesdelta):
+        # Create output matrix
+        out = np.zeroes(self.inputShape)
+
+        for k in range(self.inputShape[2]):
+            for x in range(self.sizeOfKernel):
+                for y in range(self.sizeOfKernel):
+
+                    coord = self.coords[x][y][k]
+                    out[coord[0]][coord[1]][coord[2]] = wtimesdelta[x][y][k]
         return
 
 
