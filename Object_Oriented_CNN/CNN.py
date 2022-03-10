@@ -1,5 +1,5 @@
 import numpy as np
-from project2 import Neuron
+# from project2 import Neuron
 
 
 class ConvolutionalLayer:
@@ -26,6 +26,8 @@ class ConvolutionalLayer:
         # Calculate size of output 
         self.outputX = inputShape[0] - sizeOfKernels + 1
         self.outputY = inputShape[1] - sizeOfKernels + 1
+
+        self.outputShape = (self.outputX, self.outputY, numberOfKernels)
 
         if weights is None:
             # Generate same weights
@@ -73,6 +75,11 @@ class MaxPoolingLayer:
         """
         self.sizeOfKernel = sizeOfKernel
         self.inputShape = inputShape
+
+        self.outputX = inputShape[0] - sizeOfKernel + 1
+        self.outputY = inputShape[1] - sizeOfKernel + 1
+
+        self.outputShape = (self.outputX, self.outputY, inputShape[2])
 
         # Store coordinates in a matrix for backpropogation
         self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))

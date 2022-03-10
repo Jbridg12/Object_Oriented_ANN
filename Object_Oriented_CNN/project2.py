@@ -200,10 +200,15 @@ class NeuralNetwork:
         # model.add(layers.Conv2D(2,3,input_shape=(7,7,1),activation='sigmoid'))
         print('Adding layer...')
         if len(self.layers) == 0:
-            inSize = inputSize
+            inSize = self.inputSize
         else:
             # I think this is what we are supposed to be getting? "Input size should be set to the current final layer"?
             inSize = self.layers[len(self.layers)-1].numberOfNeurons
+
+        if inputShape is None and len(self.layers) == 0:
+            inputShape = (inSize, inSize, 1)
+        else:
+            inputShape = self.layers[len(self.layers)-1].outputShape
 
         if layerType == "FullyConnected" or layerType == "fullyconnected":
             if weights is None:
@@ -323,9 +328,12 @@ if __name__ == "__main__":
         y = np.array([0.31827281])
 
         conv1_k1_weights = [[0.77126, 0.02068, 0.63358], [0.74873, 0.49844, 0.22472], [0.19798, 0.76046, 0.16903]]
-        conv1_k1_bias = [0.9176043]
+        conv1_k1_bias = 0.9176043
 
-        conv1_k2_weights = [[0.08828, 0.6853,  0.95333], [0.00388, 0.51212, 0.81255], [0.61246, 0.72169, 0.2918 ]]
+        for w in conv1_k1_weights:
+            w.append(conv1_k1_bias)
+
+        conv1_k2_weights = [[0.08828, 0.6853,  0.95333], [0.00388, 0.51212, 0.81255], [0.61246, 0.72169, 0.2918]]
         conv1_k2_bias = [0.71441317]
 
         # run a network with a 5x5 input, one 3x3 convolution layer
@@ -333,7 +341,10 @@ if __name__ == "__main__":
         # example2 uses sigmoid, MSE, and learning rate 100
         NN = NeuralNetwork(7, MSE, 100)
         print('Initialized')
-        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID)
+        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_k1_weights)
+        for l in NN.layers:
+            print(l.weights)
+        exit()
         NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID)
         NN.addLayer(layerType="Flatten")
         NN.addLayer(layerType=FullyConnected, numberOfNeurons=1, activation=SIGMOID)
