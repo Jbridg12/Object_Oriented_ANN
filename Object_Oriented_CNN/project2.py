@@ -76,8 +76,14 @@ class Neuron:
         # Append 1 for bias
         self.input.append(1)
 
+        print(self.input)
+        print(self.weights)
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
+        print()
+        print(self.weights)
+        print()
+        print(net)
 
         self.output = self.activate(net)
 
@@ -206,15 +212,22 @@ class ConvolutionalLayer:
                 # i is column
                 for i in range(self.outputX):
                     # Create a matrix to store input X's for each neuron
-                    net = np.empty((self.sizeOfKernels, self.sizeOfKernels))
+                    # net = np.empty((self.sizeOfKernels, self.sizeOfKernels))
+                    net = []
 
                     # Then iterate over each relevant element that current kernel is observing
                     # (This locates the specific element from input in the area of each kernel)
-                    for x in range(self.sizeOfKernels):
-                        for y in range(self.sizeOfKernels):
-                            net[y][x] = input[j * self.sizeOfKernels + y][i * self.sizeOfKernels + x][k]
+                    for y in range(self.sizeOfKernels):
+                        for x in range(self.sizeOfKernels):
+                            # print(f'{k} {j} {i} {x} {y}')
+                            # print(j * self.sizeOfKernels + y)
+                            # net[y][x] = input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x]
+                            net.append(input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x])
 
                     # Insert results to the output matrix
+                    print(net)
+                    print()
+                    print('neuron calculate')
                     out[j][i][k] = self.neurons[j][i][k].calculate(net)
         return
 
@@ -402,27 +415,27 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'example1':
         print('Run example1.')
 
-        x = np.array([[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
+        x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
                      [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
                      [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
                      [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
                      [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
                      [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
-                     [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]])
+                     [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]]])
 
         y = np.array([0.31827281])
 
-        conv1_k1_weights = [[0.77126, 0.02068, 0.63358], [0.74873, 0.49844, 0.22472], [0.19798, 0.76046, 0.16903]]
+        conv1_k1_weights = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
         conv1_k1_bias = 0.9176043
 
-        for w in conv1_k1_weights:
-            w.append(conv1_k1_bias)
+        # for w in conv1_k1_weights:
+        #     w.append(conv1_k1_bias)
 
-        conv1_k2_weights = [[0.08828, 0.6853,  0.95333], [0.00388, 0.51212, 0.81255], [0.61246, 0.72169, 0.2918]]
+        conv1_k2_weights = [0.08828, 0.6853,  0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
         conv1_k2_bias = 0.71441317
 
-        for w in conv1_k2_weights:
-            w.append(conv1_k2_bias)
+        # for w in conv1_k2_weights:
+        #     w.append(conv1_k2_bias)
 
         conv1_weights = [conv1_k1_weights, conv1_k2_weights]
 
