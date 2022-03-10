@@ -2,10 +2,10 @@ import numpy as np
 import sys
 import random   # Only necessary if random initialized weights
 import matplotlib.pyplot as plt
-import CNN
-from CNN import ConvolutionalLayer
-from CNN import MaxPoolingLayer
-from CNN import FlattenLayer
+# import CNN
+# from CNN import ConvolutionalLayer
+# from CNN import MaxPoolingLayer
+# from CNN import FlattenLayer
 
 """
 For this entire file there are a few constants:
@@ -154,7 +154,46 @@ class FullyConnected:
             else:
                 sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
 
-        return sum_wdelta           
+        return sum_wdelta
+
+
+class ConvolutionalLayer:
+    def __init__(self, numberOfKernels, sizeOfKernels, activation, inputShape, lr, weights=None):
+        """
+        Initializes convolutional layer for 2d convolution. Stride is always assumed to be 1. Padding is assumed to
+        be valid.
+        :param numberOfKernels: Number of kernels in layer.
+        :param sizeOfKernels: Size of kernels in layer (assume it is a square).
+        :param activation: Activation function for all neurons in the layer.
+        :param inputShape: Dimension of the inputs.
+        :param lr: Learning rate.
+        :param weights: If no weights provided, randomly initialize.
+        """
+        # Each neuron should be a Neuron object.
+        # All neurons with the same kernel share the same weights, so MUST BE INITIALIZED WITH THE SAME WEIGHTS
+        self.numberOfKernels = numberOfKernels
+        self.sizeOfKernels = sizeOfKernels
+        self.activation = activation
+        self.inputShape = inputShape
+        self.lr = lr
+        self.weights = weights
+
+        # Calculate size of output
+        self.outputX = inputShape[0] - sizeOfKernels + 1
+        self.outputY = inputShape[1] - sizeOfKernels + 1
+
+        self.outputShape = (self.outputX, self.outputY, numberOfKernels)
+        self.numberOfNeurons = self.outputX * self.outputY * numberOfKernels
+
+        if weights is None:
+            # Generate same weights
+            weights = np.fill((sizeOfKernels, sizeOfKernels), 0.5)
+
+        self.neurons = np.empty((self.outputX, self.outputY, numberOfKernels), dtype=Neuron)
+        for k in range(numberOfKernels):
+            for i in range(self.outputX):
+                for j in range(self.outputY):
+                    self.neurons[i][j][k] = Neuron(activation, sizeOfKernels**2, lr, weights)
 
 
 # An entire neural network
@@ -334,18 +373,35 @@ if __name__ == "__main__":
             w.append(conv1_k1_bias)
 
         conv1_k2_weights = [[0.08828, 0.6853,  0.95333], [0.00388, 0.51212, 0.81255], [0.61246, 0.72169, 0.2918]]
-        conv1_k2_bias = [0.71441317]
+        conv1_k2_bias = 0.71441317
+
+        for w in conv1_k2_weights:
+            w.append(conv1_k2_bias)
+
+        conv1_weights = [conv1_k1_weights, conv1_k2_weights]
+
+        conv2_k1_weights = [[[0.54199, 0.14161, 0.37278],
+                              [0.67358, 0.44127, 0.43345],
+                              [0.61721, 0.51258, 0.64983]],
+                             [[0.60048, 0.80466, 0.52108],
+                              [0.90809, 0.31867, 0.08989],
+                              [0.30014, 0.11342, 0.82811]]]
+
+        conv2_k1_bias = 0.04629412
+
+        for i in conv2_k1_weights:
+            for j in i:
+                j.append(conv2_k1_bias)
+
+        conv2_weights = conv2_k1_weights
 
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
         # example2 uses sigmoid, MSE, and learning rate 100
         NN = NeuralNetwork(7, MSE, 100)
         print('Initialized')
-        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_k1_weights)
-        for l in NN.layers:
-            print(l.weights)
-        exit()
-        NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID)
+        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights)
+        NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID, weights=conv2_weights)
         NN.addLayer(layerType="Flatten")
         NN.addLayer(layerType=FullyConnected, numberOfNeurons=1, activation=SIGMOID)
 
