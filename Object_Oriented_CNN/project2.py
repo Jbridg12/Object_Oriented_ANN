@@ -195,6 +195,52 @@ class ConvolutionalLayer:
                 for j in range(self.outputY):
                     self.neurons[i][j][k] = Neuron(activation, sizeOfKernels**2, lr, weights)
 
+    def calculate(self, input):
+        # Define output matrix
+        out = np.empty((self.outputY, self.outputX, self.numberOfKernels), dtype=Neuron)
+
+        # Loop and for each neuron in all channels (This identifies where the kernel is looking)
+        for k in range(self.inputShape[2]):
+            # j is row
+            for j in range(self.outputY):
+                # i is column
+                for i in range(self.outputX):
+                    # Create a matrix to store input X's for each neuron
+                    net = np.empty((self.sizeOfKernels, self.sizeOfKernels))
+
+                    # Then iterate over each relevant element that current kernel is observing
+                    # (This locates the specific element from input in the area of each kernel)
+                    for x in range(self.sizeOfKernels):
+                        for y in range(self.sizeOfKernels):
+                            net[y][x] = input[j * self.sizeOfKernels + y][i * self.sizeOfKernels + x][k]
+
+                    # Insert results to the output matrix
+                    out[j][i][k] = self.neurons[j][i][k].calculate(net)
+        return
+
+
+class FlattenLayer:
+    def __init__(self, inputSize):
+        self.inputSize = inputSize
+        self.numberOfNeurons = None
+        self.outputShape = None
+
+    def calculate(self, input):
+        flat = np.copy(input)
+
+        # If size is given as the shape, calculate size in one dimension
+        # flat_size = inputSize[0] * inputSize[1] * inputSize[2]
+
+        # If size is already 1D simply reshape
+        np.reshape(flat, self.inputSize)
+        self.numberOfNeurons = flat
+        self.outputShape = flat
+
+        return flat
+
+    def calculatewdeltas(self, wtimesdelta):
+        return
+
 
 # An entire neural network
 class NeuralNetwork:
@@ -395,6 +441,11 @@ if __name__ == "__main__":
 
         conv2_weights = conv2_k1_weights
 
+        fc_weights = [0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]
+        fc_bias = -0.14390945
+
+        fc_weights.append(fc_bias)
+
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
         # example2 uses sigmoid, MSE, and learning rate 100
@@ -403,7 +454,7 @@ if __name__ == "__main__":
         NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights)
         NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID, weights=conv2_weights)
         NN.addLayer(layerType="Flatten")
-        NN.addLayer(layerType=FullyConnected, numberOfNeurons=1, activation=SIGMOID)
+        NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights)
 
         output, loss = NN.train(x, y)
 
