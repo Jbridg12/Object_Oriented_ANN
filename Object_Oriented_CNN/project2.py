@@ -199,7 +199,7 @@ class ConvolutionalLayer:
         for k in range(numberOfKernels):
             for i in range(self.outputX):
                 for j in range(self.outputY):
-                    self.neurons[i][j][k] = Neuron(activation, sizeOfKernels**2, lr, weights)
+                    self.neurons[k][i][j] = Neuron(activation, sizeOfKernels**2, lr, weights)
 
     def calculate(self, input):
         # Define output matrix
@@ -228,8 +228,8 @@ class ConvolutionalLayer:
                     print(net)
                     print()
                     print('neuron calculate')
-                    out[j][i][k] = self.neurons[j][i][k].calculate(net)
-        return
+                    out[k][j][i] = self.neurons[k][j][i].calculate(net)
+        return out
 
 
 class FlattenLayer:
