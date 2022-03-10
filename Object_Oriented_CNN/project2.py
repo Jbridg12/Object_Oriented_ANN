@@ -199,7 +199,7 @@ class ConvolutionalLayer:
         for k in range(numberOfKernels):
             for i in range(self.outputX):
                 for j in range(self.outputY):
-                    self.neurons[k][i][j] = Neuron(activation, sizeOfKernels**2, lr, weights)
+                    self.neurons[k][i][j] = Neuron(activation, sizeOfKernels**2, lr, weights[k])
 
     def calculate(self, input):
         # Define output matrix
