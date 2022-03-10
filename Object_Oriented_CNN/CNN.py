@@ -31,13 +31,11 @@ class ConvolutionalLayer:
             # Generate same weights
             weights = np.fill((sizeOfKernels, sizeOfKernels), 0.5)
 
-
         self.neurons = np.empty((self.outputX, self.outputY, numberOfKernels))
         for k in range(numberOfKernels):
             for i in range(self.outputX):
                 for j in range(self.outputY):
                     self.neurons[i][j][k] = Neuron(activation, sizeOfKernels**2, lr, weights)
-
 
     def calculate(self, input):
         # Define output matrix

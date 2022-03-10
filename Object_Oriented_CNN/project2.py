@@ -205,8 +205,6 @@ class NeuralNetwork:
             # I think this is what we are supposed to be getting? "Input size should be set to the current final layer"?
             inSize = self.layers[len(self.layers)-1].numberOfNeurons
 
-        print(type(layerType))
-        print(layerType)
         if layerType == "FullyConnected" or layerType == "fullyconnected":
             if weights is None:
                 self.layers.append(FullyConnected(numberOfNeurons, activation, inSize, self.lr))
@@ -229,15 +227,12 @@ class NeuralNetwork:
             print('Max pooling layer added.')
 
         elif layerType == "Flatten" or layerType == "flatten":
-            self.layers.append(FlattenLayer(inSize))
-
             print('Flatten layer added.')
+            self.layers.append(FlattenLayer(inSize))
 
         else:
             print('Layer could not be added.')
 
-        return
-    
     # Given an input, calculate the output (using the layers calculate() method)
     def calculate(self, input):
         self.input = input   # Store list of inputs
@@ -317,41 +312,62 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'example1':
         print('Run example1.')
 
+        x = np.array([[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
+                     [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
+                     [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
+                     [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
+                     [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
+                     [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
+                     [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]])
+
+        y = np.array([0.31827281])
+
+        conv1_k1_weights = [[0.77126, 0.02068, 0.63358], [0.74873, 0.49844, 0.22472], [0.19798, 0.76046, 0.16903]]
+        conv1_k1_bias = [0.9176043]
+
+        conv1_k2_weights = [[0.08828, 0.6853,  0.95333], [0.00388, 0.51212, 0.81255], [0.61246, 0.72169, 0.2918 ]]
+        conv1_k2_bias = [0.71441317]
+
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
         # example2 uses sigmoid, MSE, and learning rate 100
-        NN = NeuralNetwork(5, MSE, 100)
+        NN = NeuralNetwork(7, MSE, 100)
         print('Initialized')
+        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID)
         NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID)
-
-        exit()
-
-        w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
-        x = np.array([0.05, 0.1])      
-        y = np.array([0.01, 0.99])
-
-        # Test neural network
-        # numOfLayers(includes hidden and output layers),
-        # numOfNeurons(an array with number for each layer),
-        # inputSize,
-        # activation(array with activation for each layer),
-        # loss, lr, weights=None
-        NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, float(sys.argv[1]), w)
-
-        for layer in range(NN.numOfLayers):
-            print(f'{NN.layers[layer].weights}')
+        NN.addLayer(layerType="Flatten")
+        NN.addLayer(layerType=FullyConnected, numberOfNeurons=1, activation=SIGMOID)
 
         output, loss = NN.train(x, y)
 
-        print(f'\nOutput: {output}, Loss: {loss}')
-        print()
-
-        print('Weights after 1-step update.')
-        for layer in range(NN.numOfLayers):
-            print(f'{NN.layers[layer].weights}')
-
-    elif sys.argv[1] == 'example2':
-        exit()
-
-    elif sys.argv[1] == 'example3':
-        exit()
+    #     exit()
+    #
+    #     w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
+    #     x = np.array([0.05, 0.1])
+    #     y = np.array([0.01, 0.99])
+    #
+    #     # Test neural network
+    #     # numOfLayers(includes hidden and output layers),
+    #     # numOfNeurons(an array with number for each layer),
+    #     # inputSize,
+    #     # activation(array with activation for each layer),
+    #     # loss, lr, weights=None
+    #     NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, float(sys.argv[1]), w)
+    #
+    #     for layer in range(NN.numOfLayers):
+    #         print(f'{NN.layers[layer].weights}')
+    #
+    #     output, loss = NN.train(x, y)
+    #
+    #     print(f'\nOutput: {output}, Loss: {loss}')
+    #     print()
+    #
+    #     print('Weights after 1-step update.')
+    #     for layer in range(NN.numOfLayers):
+    #         print(f'{NN.layers[layer].weights}')
+    #
+    # elif sys.argv[1] == 'example2':
+    #     exit()
+    #
+    # elif sys.argv[1] == 'example3':
+    #     exit()
