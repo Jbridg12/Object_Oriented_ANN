@@ -195,10 +195,13 @@ class ConvolutionalLayer:
             # Generate same weights
             weights = np.fill((sizeOfKernels, sizeOfKernels), 0.5)
 
-        self.neurons = np.empty((self.outputX, self.outputY, numberOfKernels), dtype=Neuron)
+        self.neurons = np.empty((numberOfKernels, self.outputX, self.outputY), dtype=Neuron)
+        print(self.neurons.shape)
         for k in range(numberOfKernels):
             for i in range(self.outputX):
                 for j in range(self.outputY):
+                    #print(self.weights.shape)
+                    #print("k={0} | i={1} | j={2}".format(k, i, j))
                     self.neurons[k][i][j] = Neuron(activation, sizeOfKernels**2, lr, weights[k])
 
     def calculate(self, input):
@@ -425,19 +428,27 @@ if __name__ == "__main__":
 
         y = np.array([0.31827281])
 
-        conv1_k1_weights = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
+        # Changed arrays to be proper orientation should allow viewing better
+        # Bias is not there rn
+        conv1_k1_weights = [[0.77126, 0.02068, 0.63358], 
+                            [0.74873, 0.49844, 0.22472], 
+                            [0.19798, 0.76046, 0.16903, ]]
         conv1_k1_bias = 0.9176043
 
         # for w in conv1_k1_weights:
         #     w.append(conv1_k1_bias)
 
-        conv1_k2_weights = [0.08828, 0.6853,  0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
+        conv1_k2_weights = [[0.08828, 0.6853,  0.95333], 
+                            [0.00388, 0.51212, 0.81255], 
+                            [0.61246, 0.72169, 0.2918,]]
+
         conv1_k2_bias = 0.71441317
 
         # for w in conv1_k2_weights:
         #     w.append(conv1_k2_bias)
 
-        conv1_weights = [conv1_k1_weights, conv1_k2_weights]
+        # Need to not be lists so the more we can keep in numpy arrays the better
+        conv1_weights = np.array([conv1_k1_weights, conv1_k2_weights])
 
         conv2_k1_weights = [[[0.54199, 0.14161, 0.37278],
                               [0.67358, 0.44127, 0.43345],
@@ -452,7 +463,7 @@ if __name__ == "__main__":
             for j in i:
                 j.append(conv2_k1_bias)
 
-        conv2_weights = conv2_k1_weights
+        conv2_weights = np.array(conv2_k1_weights)
 
         fc_weights = [0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]
         fc_bias = -0.14390945
