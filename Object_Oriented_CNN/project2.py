@@ -280,7 +280,7 @@ class NeuralNetwork:
     # def __init__(self, numOfLayers, numOfNeurons, inputSize, activation, loss, lr, weights=None):
     def __init__(self, inputSize, loss, lr):
         # self.numOfLayers = numOfLayers
-        # self.numOfNeurons = numOfNeurons
+        self.numOfNeurons = numOfNeurons
         self.inputSize = inputSize
         # self.activation = activation
         self.loss = loss
@@ -401,6 +401,10 @@ class NeuralNetwork:
     
     # Given a single input and desired output preform one step of backpropagation (including a forward pass, getting the derivative of the loss, and then calling calcwdeltas for layers with the right values
     def train(self, x, y):
+        # Number of layers in output layer
+        print(self.layers[len(self.layers) - 1])
+        exit()
+        # self.numOfLayers = self.layers[len(self.layers) - 1].numOfNeurons
 
         y_test = self.calculate(x)      # One forward pass
         
