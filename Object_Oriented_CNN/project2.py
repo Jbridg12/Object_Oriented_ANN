@@ -45,7 +45,8 @@ class Neuron:
         if weights is None:
             self.weights = [random.random() for i in range(input_num + 1)]
         else:
-            self.weights = weights  # is a vector
+            self.weights = weights[0]  # is an array
+            self.bias = weights[1]
 
     # This method returns the activation of the net
     def activate(self, net):
@@ -74,18 +75,20 @@ class Neuron:
         self.input = list(input)
 
         # Append 1 for bias
-        self.input.append(1)
+        #self.input.append(1)
 
         print(self.input)
         print(self.weights)
         mul = np.multiply(self.input, self.weights)
         net = np.sum(mul)
+        net += self.bias
         print()
-        print(self.weights)
+        #print(self.weights)
         print()
         print(net)
-
+        print(self.activate(net))
         self.output = self.activate(net)
+        return self.output
 
     # This method returns the derivative of the activation function with respect to the net
     def activationderivative(self):
@@ -116,7 +119,7 @@ class Neuron:
 
 # A fully connected layer
 class FullyConnected:
-    # initialize with the number of neurons in the layer, their activation,the input size, the leraning rate and a 2d matrix of weights (or else initilize randomly)
+    # initialize with the number of neurons in the layer, their activation,the input size, the learning rate and a 2d matrix of weights (or else initilize randomly)
     def __init__(self, numOfNeurons, activation, input_num, lr, weights=None):
         self.numOfNeurons = numOfNeurons
         self.activation = activation
@@ -133,7 +136,8 @@ class FullyConnected:
             if weights is None:
                 self.neurons.append(Neuron(activation, input_num, lr, weights))
             else:
-                self.neurons.append(Neuron(activation, input_num, lr, weights[i]))
+                #self.neurons.append(Neuron(activation, input_num, lr, weights[i]))
+                self.neurons.append(Neuron(activation, input_num, lr, weights))
 
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
@@ -206,32 +210,37 @@ class ConvolutionalLayer:
 
     def calculate(self, input):
         # Define output matrix
-        out = np.empty((self.outputY, self.outputX, self.numberOfKernels), dtype=Neuron)
+        out = np.empty((self.numberOfKernels, self.outputY, self.outputX), dtype=Neuron)
 
         # Loop and for each neuron in all channels (This identifies where the kernel is looking)
-        for k in range(self.inputShape[2]):
+        for z in range(self.numberOfKernels):
             # j is row
             for j in range(self.outputY):
                 # i is column
                 for i in range(self.outputX):
                     # Create a matrix to store input X's for each neuron
                     # net = np.empty((self.sizeOfKernels, self.sizeOfKernels))
-                    net = []
+                    net = np.zeros((self.sizeOfKernels, self.sizeOfKernels))
 
                     # Then iterate over each relevant element that current kernel is observing
                     # (This locates the specific element from input in the area of each kernel)
-                    for y in range(self.sizeOfKernels):
-                        for x in range(self.sizeOfKernels):
-                            # print(f'{k} {j} {i} {x} {y}')
-                            # print(j * self.sizeOfKernels + y)
-                            # net[y][x] = input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x]
-                            net.append(input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x])
+                    for k in range(self.inputShape[2]):
+                        for y in range(self.sizeOfKernels):
+                            for x in range(self.sizeOfKernels):
+                                # print(f'{k} {j} {i} {x} {y}')
+                                # print(j * self.sizeOfKernels + y)
+                                #print(input.shape)
+                                net[y][x] += input[k][j + y][i + x]
+                                #net[y][x] = input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x]
+                                #net.append(input[k][j * self.sizeOfKernels + y][i * self.sizeOfKernels + x])
 
                     # Insert results to the output matrix
-                    print(net)
+                    #print(net)
                     print()
                     print('conv neuron calculate')
-                    out[k][j][i] = self.neurons[k][j][i].calculate(net)
+                    out[z][j][i] = self.neurons[z][j][i].calculate(net)
+
+        print(out)
         return out
 
 
@@ -245,13 +254,20 @@ class FlattenLayer:
         flat = np.copy(input)
 
         # If size is given as the shape, calculate size in one dimension
-        # flat_size = inputSize[0] * inputSize[1] * inputSize[2]
-
+        flat_size = self.inputSize[0] * self.inputSize[1] * self.inputSize[2]
+        
+        #flat = np.array((flat_size))
         # If size is already 1D simply reshape
-        np.reshape(flat, self.inputSize)
-        self.numberOfNeurons = flat
-        self.outputShape = flat
+        #print(flat)
+        #np.reshape(flat, (flat_size))
+        # Finally found proper function to flatten
 
+        flat = np.ravel(flat) 
+        #print(flat.shape)
+        self.numberOfNeurons = flat_size
+        self.outputShape = flat.shape
+
+        #print(flat)
         return flat
 
     def calculatewdeltas(self, wtimesdelta):
@@ -333,8 +349,8 @@ class NeuralNetwork:
             print('Max pooling layer added.')
 
         elif layerType == "Flatten" or layerType == "flatten":
-            print('Flatten layer added.')
-            self.layers.append(FlattenLayer(inSize))
+            print('Flatten layer added. InShape = {0}'.format(inputShape))
+            self.layers.append(FlattenLayer(inputShape))
 
         else:
             print('Layer could not be added.')
@@ -418,14 +434,15 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'example1':
         print('Run example1.')
 
-        # x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
-        #              [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
-        #              [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
-        #              [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
-        #              [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
-        #              [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
-        #              [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]]])
+        x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
+                      [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
+                      [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
+                      [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
+                      [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
+                      [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
+                      [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]]])
 
+        '''
         x = np.array([0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071,
                      0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795,
                      0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303,
@@ -433,23 +450,23 @@ if __name__ == "__main__":
                      0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566,
                      0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225,
                      0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382])
-
+        '''
         y = np.array([0.31827281])
 
         # Changed arrays to be proper orientation should allow viewing better
         # Bias is not there rn
-        # conv1_k1_weights = [[0.77126, 0.02068, 0.63358],
-        #                     [0.74873, 0.49844, 0.22472],
-        #                     [0.19798, 0.76046, 0.16903]]
+        conv1_k1_weights = [[[0.77126, 0.02068, 0.63358],
+                             [0.74873, 0.49844, 0.22472],
+                             [0.19798, 0.76046, 0.16903]], 0.9176043]
         conv1_k1_neuron = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
         conv1_k1_bias = 0.9176043
 
         # for w in conv1_k1_weights:
         #     w.append(conv1_k1_bias)
 
-        # conv1_k2_weights = [[0.08828, 0.6853,  0.95333],
-        #                     [0.00388, 0.51212, 0.81255],
-        #                     [0.61246, 0.72169, 0.2918]]
+        conv1_k2_weights = [[[0.08828, 0.6853,  0.95333],
+                             [0.00388, 0.51212, 0.81255],
+                             [0.61246, 0.72169, 0.2918]], 0.71441317]
         conv1_k2_neuron = [0.08828, 0.6853, 0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
         conv1_k2_bias = 0.71441317
 
@@ -459,25 +476,27 @@ if __name__ == "__main__":
         # Need to not be lists so the more we can keep in numpy arrays the better
         conv1_weights = np.array([conv1_k1_weights, conv1_k2_weights])
 
-        conv2_k1_weights = [[[0.54199, 0.14161, 0.37278],
+        conv2_k1_weights = [[[[0.54199, 0.14161, 0.37278],
                               [0.67358, 0.44127, 0.43345],
-                              [0.61721, 0.51258, 0.64983]],
-                             [[0.60048, 0.80466, 0.52108],
+                              [0.61721, 0.51258, 0.64983]], 0.04629412],
+                             [[[0.60048, 0.80466, 0.52108],
                               [0.90809, 0.31867, 0.08989],
-                              [0.30014, 0.11342, 0.82811]]]
+                              [0.30014, 0.11342, 0.82811]], 0.04629412]]
 
         conv2_k1_bias = 0.04629412
 
+        '''
         for i in conv2_k1_weights:
             for j in i:
                 j.append(conv2_k1_bias)
+        '''
 
         conv2_weights = np.array(conv2_k1_weights)
 
-        fc_weights = [0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]
+        fc_weights = np.array([[[0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]], -0.14390945])
         fc_bias = -0.14390945
 
-        fc_weights.append(fc_bias)
+        #fc_weights.append(fc_bias)
 
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
