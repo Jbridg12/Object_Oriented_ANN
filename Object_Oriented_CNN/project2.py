@@ -172,7 +172,8 @@ class Neuron:
         else:
             for i in range(self.input_num):
                 self.weights[0][i] -= self.lr * self.d * self.input[0][i]
-                self.bias -= self.lr * self.d
+            print(self.bias)
+            self.bias -= self.lr * self.d
 
         return
 
@@ -219,7 +220,7 @@ class FullyConnected:
     def calcwdeltas(self, wtimesdelta):
         sum_wdelta = []
 
-        print(self.neurons)
+        #print(self.neurons)
         for i in range(self.numOfNeurons):
             new_wd = self.neurons[i].calcpartialderivative(wtimesdelta[i])  # Get each neuron's new wtimesdelta, not quite sure if the whole vector needs to be passed but it looks like it
             self.neurons[i].updateweight()
@@ -546,12 +547,11 @@ class NeuralNetwork:
 
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
-        numOfNeurons = len(self.layers[len(self.layers)-1].neurons)     # Number of neurons in last layer
-
+        numOfNeurons = len(self.layers[-1].neurons)     # Number of neurons in last layer
         pd_loss = []
         if self.loss == 0:
             for i in range(numOfNeurons):
-                pd_loss.append(-1 * (y[i] - yp[i]))        # Current loss derivative set to use
+                pd_loss.append(-2 * (y[i] - yp[i]))        # Current loss derivative set to use
 
         elif self.loss == 1:
             # Do binary cross entropy deriv 
@@ -570,6 +570,7 @@ class NeuralNetwork:
 
         y_test = self.calculate(x)      # One forward pass
         print(y_test)
+        print(self.calculateloss(y_test, y))
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
 
 
