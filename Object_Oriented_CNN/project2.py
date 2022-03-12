@@ -96,7 +96,7 @@ class Neuron:
             mul = np.multiply(self.input[i], self.weights[i])
             net += np.sum(mul)
 
-        
+
         net += self.bias
         # print()
         #print(self.weights)
@@ -154,7 +154,7 @@ class Neuron:
     
     # Simply update the weights using the partial derivatives and the learning weight
     def updateweight(self, mode='FullyConnected'):
-        
+
         '''
         for w in self.weights:
             for i in range(self.input_num):
@@ -173,7 +173,7 @@ class Neuron:
             for i in range(self.input_num):
                 self.weights[0][i] -= self.lr * self.d * self.input[0][i]
                 self.bias -= self.lr * self.d
-        
+
         return
 
 
@@ -572,7 +572,7 @@ class NeuralNetwork:
         print(y_test)
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
 
-        
+
         for i in range(numOfLayers):
             print(f'Layer: {numOfLayers-i}')
             curr_layer = numOfLayers - 1 - i       # Calc index for moving backwards
@@ -582,7 +582,7 @@ class NeuralNetwork:
         new_y_test = self.calculate(x)
         print(new_y_test)
         calc_loss = self.calculateloss(new_y_test, y)
-        
+
         return y_test, calc_loss
 
 
@@ -598,108 +598,125 @@ def plot_lr(lr_list, labels, l=0, a=0):
 
 
 if __name__ == "__main__":
+    x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
+                   [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
+                   [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
+                   [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
+                   [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
+                   [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
+                   [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]]])
+
+    '''
+    x = np.array([0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071,
+                 0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795,
+                 0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303,
+                 0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517,
+                 0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566,
+                 0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225,
+                 0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382])
+    '''
+    y = np.array([0.31827281])
+
+    # Changed arrays to be proper orientation should allow viewing better
+    # Bias is not there rn
+
+    '''
+    Keeping the weights from after 1 step Backprop around for comparison later
+
+    conv1_k1_weights = np.array([[[0.77126, 0.02068, 0.63358],
+                         [0.74873, 0.49844, 0.22472],
+                         [0.19798, 0.76046, 0.16903]]])
+
+    conv1_k1_bias = 0.9176043
+
+    conv1_k2_weights = np.array([[[0.08828, 0.6853,  0.95333],
+                         [0.00388, 0.51212, 0.81255],
+                         [0.61246, 0.72169, 0.2918]]])
+
+    conv1_k2_bias = 0.71441317
+
+
+    conv2_k1_weights = [[[[0.54199, 0.14161, 0.37278],
+                          [0.67358, 0.44127, 0.43345],
+                          [0.61721, 0.51258, 0.64983]],
+                         [[0.60048, 0.80466, 0.52108],
+                          [0.90809, 0.31867, 0.08989],
+                          [0.30014, 0.11342, 0.82811]]]]
+
+    conv2_k1_bias = 0.04629412
+
+
+    fc_weights = np.array([[[0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]]])
+    fc_bias = -0.14390945
+
+    '''
+
+    conv1_k1_weights = np.array([[[0.77132, 0.02075, 0.63365],
+                                  [0.7488, 0.49851, 0.2248],
+                                  [0.19806, 0.76053, 0.16911]]])
+
+    conv1_k1_neuron = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
+    conv1_k1_bias = 0.91777414
+
+    # for w in conv1_k1_weights:
+    #     w.append(conv1_k1_bias)
+
+    conv1_k2_weights = np.array([[[0.08834, 0.68536, 0.95339],
+                                  [0.00395, 0.51219, 0.81262],
+                                  [0.61253, 0.72176, 0.29188]]])
+
+    conv1_k2_neuron = [0.08828, 0.6853, 0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
+    conv1_k2_bias = 0.71457577
+
+    conv1_biases = np.array([conv1_k1_bias, conv1_k2_bias])
+    # for w in conv1_k2_weights:
+    #     w.append(conv1_k2_bias)
+
+    # Need to not be lists so the more we can keep in numpy arrays the better
+    conv1_weights = np.array([conv1_k1_weights, conv1_k2_weights])
+
+    conv2_k1_weights = [[[[0.54254, 0.14217, 0.37334],
+                          [0.67413, 0.44183, 0.43401],
+                          [0.61777, 0.51314, 0.6504]],
+                         [[0.60104, 0.80522, 0.52165],
+                          [0.90865, 0.31924, 0.09046],
+                          [0.3007, 0.11398, 0.82868]]]]
+
+    conv2_k1_bias = 0.04689632
+    conv2_biases = np.array([conv2_k1_bias])
+
+    '''
+    for i in conv2_k1_weights:
+        for j in i:
+            j.append(conv2_k1_bias)
+    '''
+
+    conv2_weights = np.array(conv2_k1_weights)
+
+    fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
+    fc_bias = 0.32551163
+
     if len(sys.argv) < 2:
         print('Invalid input')
 
     elif sys.argv[1] == 'example1':
         print('Run example1.')
 
-        x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071],
-                      [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795],
-                      [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303],
-                      [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517],
-                      [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566],
-                      [0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225],
-                      [0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382]]])
+        NN = NeuralNetwork(5, MSE, 100)
+        print('Initialized')
+        NN.addLayer(layerType="Conv", numberOfKernels=1, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights,
+                    biases=conv1_biases)
+        NN.addLayer(layerType="Flatten")
+        NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights,
+                    biases=fc_bias)
 
-        '''
-        x = np.array([0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071,
-                     0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795,
-                     0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303,
-                     0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715, 0.04309736, 0.87991517,
-                     0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663, 0.59783665, 0.26221566,
-                     0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702, 0.47513225,
-                     0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382])
-        '''
-        y = np.array([0.31827281])
+        output, loss = NN.train(x, y)
 
-        # Changed arrays to be proper orientation should allow viewing better
-        # Bias is not there rn
-
-
-        '''
-        Keeping the weights from after 1 step Backprop around for comparison later
-
-        conv1_k1_weights = np.array([[[0.77126, 0.02068, 0.63358],
-                             [0.74873, 0.49844, 0.22472],
-                             [0.19798, 0.76046, 0.16903]]])
-
-        conv1_k1_bias = 0.9176043
-
-        conv1_k2_weights = np.array([[[0.08828, 0.6853,  0.95333],
-                             [0.00388, 0.51212, 0.81255],
-                             [0.61246, 0.72169, 0.2918]]])
-
-        conv1_k2_bias = 0.71441317
-
-
-        conv2_k1_weights = [[[[0.54199, 0.14161, 0.37278],
-                              [0.67358, 0.44127, 0.43345],
-                              [0.61721, 0.51258, 0.64983]],
-                             [[0.60048, 0.80466, 0.52108],
-                              [0.90809, 0.31867, 0.08989],
-                              [0.30014, 0.11342, 0.82811]]]]
-
-        conv2_k1_bias = 0.04629412
-
-
-        fc_weights = np.array([[[0.15698, 0.07829, 0.34998, -0.27036, 0.38755, -0.11766, 0.28534, -0.17335, 0.41462]]])
-        fc_bias = -0.14390945
-
-        '''
-
-
-        conv1_k1_weights = np.array([[[0.77132, 0.02075, 0.63365],
-                             [0.7488, 0.49851, 0.2248],
-                             [0.19806, 0.76053, 0.16911]]])
-
-        conv1_k1_neuron = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
-        conv1_k1_bias = 0.91777414
-
-        # for w in conv1_k1_weights:
-        #     w.append(conv1_k1_bias)
-
-        conv1_k2_weights = np.array([[[0.08834, 0.68536,  0.95339],
-                             [0.00395, 0.51219, 0.81262],
-                             [0.61253, 0.72176, 0.29188]]])
-
-        
-        conv1_k2_neuron = [0.08828, 0.6853, 0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
-        conv1_k2_bias = 0.71457577
-
-        conv1_biases = np.array([conv1_k1_bias, conv1_k2_bias])
-        # for w in conv1_k2_weights:
-        #     w.append(conv1_k2_bias)
-
-        # Need to not be lists so the more we can keep in numpy arrays the better
-        conv1_weights = np.array([conv1_k1_weights, conv1_k2_weights])
-
-        conv2_k1_weights = [[[[0.54254, 0.14217, 0.37334],
-                              [0.67413, 0.44183, 0.43401],
-                              [0.61777, 0.51314, 0.6504]],
-                             [[0.60104, 0.80522, 0.52165],
-                              [0.90865, 0.31924, 0.09046],
-                              [0.3007, 0.11398, 0.82868]]]]
-
-        conv2_k1_bias = 0.04689632
-        conv2_biases = np.array([conv2_k1_bias])
-
-
-        conv2_weights = np.array(conv2_k1_weights)
-
+    elif sys.argv[1] == 'example2':
+        print('Run example2.')
         fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
         fc_bias = 0.32551163
-        
+
 
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
@@ -713,34 +730,16 @@ if __name__ == "__main__":
 
         output, loss = NN.train(x, y)
 
-    #     exit()
-    #
-    #     w = np.array([[[.15, .2, .35], [.25, .3, .35]], [[.4, .45, .6], [.5, .55, .6]]])
-    #     x = np.array([0.05, 0.1])
-    #     y = np.array([0.01, 0.99])
-    #
-    #     # Test neural network
-    #     # numOfLayers(includes hidden and output layers),
-    #     # numOfNeurons(an array with number for each layer),
-    #     # inputSize,
-    #     # activation(array with activation for each layer),
-    #     # loss, lr, weights=None
-    #     NN = NeuralNetwork(2, [2, 2], 2, [1, 1], 0, float(sys.argv[1]), w)
-    #
-    #     for layer in range(NN.numOfLayers):
-    #         print(f'{NN.layers[layer].weights}')
-    #
-    #     output, loss = NN.train(x, y)
-    #
-    #     print(f'\nOutput: {output}, Loss: {loss}')
-    #     print()
-    #
-    #     print('Weights after 1-step update.')
-    #     for layer in range(NN.numOfLayers):
-    #         print(f'{NN.layers[layer].weights}')
-    #
-    # elif sys.argv[1] == 'example2':
-    #     exit()
-    #
-    # elif sys.argv[1] == 'example3':
-    #     exit()
+    elif sys.argv[1] == 'example3':
+        print('Run example3.')
+
+        NN = NeuralNetwork(8, MSE, 100)
+        print('Initialized')
+        NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights,
+                    biases=conv1_biases)
+        NN.addLayer(layerType="MaxPool", sizeOfKernels=2)
+        NN.addLayer(layerType="Flatten")
+        NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights,
+                    biases=fc_bias)
+
+        output, loss = NN.train(x, y)
