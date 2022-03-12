@@ -580,10 +580,10 @@ class NeuralNetwork:
             #print(wtimesdelta)
         
         new_y_test = self.calculate(x)
-        print(new_y_test)
+        # print(new_y_test)
         calc_loss = self.calculateloss(new_y_test, y)
 
-        return y_test, calc_loss
+        return new_y_test, calc_loss
 
 
 def plot_lr(lr_list, labels, l=0, a=0):
@@ -650,31 +650,34 @@ if __name__ == "__main__":
     fc_bias = -0.14390945
 
     '''
+    # x = np.array([[[0.1650159, 0.39252924, 0.09346037, 0.82110566, 0.15115202],
+    #                [0.98762547, 0.45630455, 0.82612284, 0.25137413, 0.59737165],
+    #                [0.59020136, 0.03928177, 0.35718176, 0.07961309, 0.30545992],
+    #                [0.03995921, 0.42949218, 0.31492687, 0.63649114, 0.34634715],
+    #                [0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663]]])
 
+    # Weights for first conv layer, first kernel
     conv1_k1_weights = np.array([[[0.77132, 0.02075, 0.63365],
                                   [0.7488, 0.49851, 0.2248],
                                   [0.19806, 0.76053, 0.16911]]])
 
-    conv1_k1_neuron = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
+    # conv1_k1_neuron = [0.77126, 0.02068, 0.63358, 0.74873, 0.49844, 0.22472, 0.19798, 0.76046, 0.16903, 0.9176043]
     conv1_k1_bias = 0.91777414
 
-    # for w in conv1_k1_weights:
-    #     w.append(conv1_k1_bias)
-
+    # Weights for first conv layer, second kernel
     conv1_k2_weights = np.array([[[0.08834, 0.68536, 0.95339],
                                   [0.00395, 0.51219, 0.81262],
                                   [0.61253, 0.72176, 0.29188]]])
 
-    conv1_k2_neuron = [0.08828, 0.6853, 0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
+    # conv1_k2_neuron = [0.08828, 0.6853, 0.95333, 0.00388, 0.51212, 0.81255, 0.61246, 0.72169, 0.2918, 0.71441317]
     conv1_k2_bias = 0.71457577
 
     conv1_biases = np.array([conv1_k1_bias, conv1_k2_bias])
-    # for w in conv1_k2_weights:
-    #     w.append(conv1_k2_bias)
 
     # Need to not be lists so the more we can keep in numpy arrays the better
     conv1_weights = np.array([conv1_k1_weights, conv1_k2_weights])
 
+    # Weights for second conv layer w/ two channel
     conv2_k1_weights = [[[[0.54254, 0.14217, 0.37334],
                           [0.67413, 0.44183, 0.43401],
                           [0.61777, 0.51314, 0.6504]],
@@ -685,14 +688,9 @@ if __name__ == "__main__":
     conv2_k1_bias = 0.04689632
     conv2_biases = np.array([conv2_k1_bias])
 
-    '''
-    for i in conv2_k1_weights:
-        for j in i:
-            j.append(conv2_k1_bias)
-    '''
-
     conv2_weights = np.array(conv2_k1_weights)
 
+    # Weights for flatten/dense layer
     fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
     fc_bias = 0.32551163
 
@@ -711,11 +709,13 @@ if __name__ == "__main__":
                     biases=fc_bias)
 
         output, loss = NN.train(x, y)
+        print(f'OUTPUT: {output}')
+        print(f'LOSS: {loss}')
 
     elif sys.argv[1] == 'example2':
         print('Run example2.')
-        fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
-        fc_bias = 0.32551163
+        # fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
+        # fc_bias = 0.32551163
 
 
         # run a network with a 5x5 input, one 3x3 convolution layer
@@ -729,6 +729,8 @@ if __name__ == "__main__":
         NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights, biases = fc_bias)
 
         output, loss = NN.train(x, y)
+        print(f'OUTPUT: {output}')
+        print(f'LOSS: {loss}')
 
     elif sys.argv[1] == 'example3':
         print('Run example3.')
