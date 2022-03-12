@@ -123,7 +123,4 @@ fully connected layer weights:
 fully connected layer bias:
 -0.3787216
 
-OUTPUT: [0.7245792734818262]
-LOSS: 0.16508494226710851
-
 """
