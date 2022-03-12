@@ -570,7 +570,6 @@ class NeuralNetwork:
 
         y_test = self.calculate(x)      # One forward pass
         print(y_test)
-        print(self.calculateloss(y_test, y))
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
 
 
