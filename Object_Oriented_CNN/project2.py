@@ -95,7 +95,9 @@ class Neuron:
             #print(i)
             mul = np.multiply(self.input[i], self.weights[i])
             net += np.sum(mul)
-            net += self.bias
+
+        
+        net += self.bias
         # print()
         #print(self.weights)
         # print()
@@ -114,7 +116,7 @@ class Neuron:
             return self.output * (1 - self.output)
 
     # This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
-    def calcpartialderivative(self, wtimesdelta):
+    def calcpartialderivative(self, wtimesdelta, mode='FullyConnected'):
         new_wd = []
 
         curr_delta = wtimesdelta * self.activationderivative()
@@ -124,29 +126,55 @@ class Neuron:
             print(f'WEIGHTS: {self.weights}')
             print(f'DELTAS: {curr_delta}')
             new_wd.append(self.weights[i] * curr_delta)"""
+        if mode == 'Convolution' or mode == 'convolution':
+            new_wd = np.empty((self.in_channels, self.weights.shape[1], self.weights.shape[2]))
+            for ch in range(self.in_channels):
+                for row in range(self.weights.shape[1]):
+                    for col in range(self.weights.shape[2]):
+                       new_wd[ch][row][col] = self.d * self.weights[ch][row][col]
+        else:
+            new_wd = np.empty((self.input_num))
 
-        for w in self.weights:
-            print(f'WEIGHTS: {w}')
-            print()
             for i in range(self.input_num):
-                print(f'WEIGHTS: {w[i]}')
-                print(f'DELTAS: {curr_delta}')
-                new_wd.append(w[i] * curr_delta)
+                    print(f'WEIGHTS: {self.weights[0][i]}')
+                    print(f'DELTAS: {curr_delta}')
+                    new_wd[i] = self.weights[0][i] * curr_delta
+
+            '''
+            for ch in range(self.in_channels):
+                print(f'WEIGHTS: {w}')
+                print()
+                for i in range(self.input_num):
+                    print(f'WEIGHTS: {w[i]}')
+                    print(f'DELTAS: {curr_delta}')
+                    new_wd.append(w[i] * curr_delta)
+            '''
 
         return new_wd 
     
     # Simply update the weights using the partial derivatives and the learning weight
-    def updateweight(self):
-        """for i in range(self.input_num + 1):
-            self.weights[i] -= self.lr * self.d * self.input[i]"""
+    def updateweight(self, mode='FullyConnected'):
+        
         '''
         for w in self.weights:
             for i in range(self.input_num):
                 w[i] -= self.lr * self.d * self.input[i]
         '''
+        if mode == 'Convolution' or mode == 'convolution':
+            out = np.empty((self.in_channels, self.weights.shape[1], self.weights.shape[2]))
+            b_out = self.lr * self.d
 
-        for row in range(self.weights.shape[0]):
-            return
+            for ch in range(self.in_channels):
+                for row in range(self.weights.shape[1]):
+                    for col in range(self.weights.shape[2]):
+                       out[ch][row][col] = self.lr * self.d * self.input[ch][row][col]
+            return out, b_out
+        else:
+            for i in range(self.input_num):
+                self.weights[0][i] -= self.lr * self.d * self.input[0][i]
+                self.bias -= self.lr * self.d
+        
+        return
 
 
 # A fully connected layer
@@ -174,7 +202,7 @@ class FullyConnected:
     # calcualte the output of all the neurons in the layer and return a vector with those values (go through the neurons and call the calcualte() method)
     def calculate(self, input):
         self.input = input
-        print(f'FC INPUT: {self.input}')
+        #print(f'FC INPUT: {self.input}')
         self.output = []    # Reset array for ouput since it was infinitely expanding
         if self.input_num is None:
             self.input_num = len(input)
@@ -201,6 +229,7 @@ class FullyConnected:
             else:
                 sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
 
+        print(self.neurons[0].bias)
         return sum_wdelta
 
 class MaxPoolingLayer:
@@ -342,8 +371,40 @@ class ConvolutionalLayer:
 
     def calcwdeltas(self, wtimesdelta):
         # Create output matrix
-        out = np.zeros(self.inputShape)
-        return
+        out = np.zeros((self.inputShape[2], self.inputShape[0], self.inputShape[1]))
+        weight_sum = np.zeros((self.inputShape[2], self.sizeOfKernels, self.sizeOfKernels))
+        bias_sum = np.zeros((self.numberOfKernels))
+        #print(out.shape)
+
+        for k in range(self.numberOfKernels):
+            for i in range(self.outputX):
+                for j in range(self.outputY):
+
+                    d_out = self.neurons[k][i][j].calcpartialderivative(wtimesdelta[k][i][j], mode='Convolution')
+                    w_up, b_up = self.neurons[k][i][j].updateweight(mode='Convolution')
+                    np.add(weight_sum, w_up)
+                    bias_sum[k] += b_up
+                    for ch in range(self.inputShape[2]):
+                        for row in range(self.sizeOfKernels):
+                            for col in range(self.sizeOfKernels):
+                                out[ch][i+row][j+col] += d_out[ch][row][col]
+
+        for k in range(self.numberOfKernels):
+            for i in range(self.outputX):
+                for j in range(self.outputY):
+                    self.neurons[k][i][j].bias -= bias_sum[k]
+                    for ch in range(self.inputShape[2]):
+                        for row in range(self.sizeOfKernels):
+                            for col in range(self.sizeOfKernels):
+                                self.neurons[k][i][j].weights[ch][row][col] -= weight_sum[ch][row][col]
+
+        print(self.neurons[0][0][0].weights)
+        print(self.neurons[0][0][0].bias)
+        if(self.numberOfKernels == 2):
+            print(self.neurons[1][0][0].weights)
+            print(self.neurons[1][0][0].bias)
+
+        return out
 
 
 class FlattenLayer:
@@ -373,7 +434,17 @@ class FlattenLayer:
         return np.array([flat])
 
     def calcwdeltas(self, wtimesdelta):
-        return
+        out_wd = np.empty((self.inputSize[2], self.inputSize[0], self.inputSize[1]))
+        #print(out_wd.shape)
+        #print(self.inputSize)
+        #print(wtimesdelta)
+        for k in range(self.inputSize[2]):
+            for j in range(self.inputSize[0]):
+                for i in range(self.inputSize[1]):
+                    wtd_index = (k*self.inputSize[1]*self.inputSize[0]) + j*self.inputSize[0] + i
+                    out_wd[k][j][i] = wtimesdelta[wtd_index]
+        #print(out_wd)
+        return out_wd
 
 
 # An entire neural network
@@ -393,30 +464,14 @@ class NeuralNetwork:
         self.output = None
         self.layers = []
 
-        # I think this part needs to be taken out from what problem description 1a is saying???
-        # List of numOfLayers Fully Connected elements
-        # self.layers = []
-        # for i in range(numOfLayers):
-        #     inSize = None
-        #     if i == 0:
-        #         # if layer receives from input layer
-        #         inSize = inputSize
-        #     else:
-        #         # if layer is not receiving from input layer, see how many neurons were in previous layer
-        #         inSize = numOfNeurons[i-1]
-        #
-        #
-        #     if weights is None:
-        #         self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr))
-        #     else:
-        #         self.layers.append(FullyConnected(numOfNeurons[i], activation[i], inSize, lr, weights[i]))
-
     def addLayer(self, layerType, inputSize=None, numberOfNeurons=None, numberOfKernels=None, sizeOfKernels=None,
                  activation=None, inputShape=None, weights=None, biases=None):
+
         # (numberOfKernels, sizeOfKernels, activation, inputShape, lr, weights=None)
         # Input size should be set to the current final layer
         # I think it is supposed to be like model.add()?
         # model.add(layers.Conv2D(2,3,input_shape=(7,7,1),activation='sigmoid'))
+
         print('Adding layer...')
         if len(self.layers) == 0:
             inSize = self.inputSize
@@ -488,6 +543,7 @@ class NeuralNetwork:
 
             return sum / len(y)     # Online this showed to be an average
 
+
     # Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)
     def lossderiv(self, yp, y):
         numOfNeurons = len(self.layers[len(self.layers)-1].neurons)     # Number of neurons in last layer
@@ -515,15 +571,18 @@ class NeuralNetwork:
         y_test = self.calculate(x)      # One forward pass
         print(y_test)
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
-        '''
+
+        
         for i in range(numOfLayers):
             print(f'Layer: {numOfLayers-i}')
             curr_layer = numOfLayers - 1 - i       # Calc index for moving backwards
-            wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)      
+            wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
+            #print(wtimesdelta)
         
         new_y_test = self.calculate(x)
+        print(new_y_test)
         calc_loss = self.calculateloss(new_y_test, y)
-        '''
+        
         return y_test, calc_loss
 
 
@@ -635,18 +694,12 @@ if __name__ == "__main__":
         conv2_k1_bias = 0.04689632
         conv2_biases = np.array([conv2_k1_bias])
 
-        '''
-        for i in conv2_k1_weights:
-            for j in i:
-                j.append(conv2_k1_bias)
-        '''
 
         conv2_weights = np.array(conv2_k1_weights)
 
         fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
         fc_bias = 0.32551163
-
-        #fc_weights.append(fc_bias)
+        
 
         # run a network with a 5x5 input, one 3x3 convolution layer
         # with a single kernel, a flatten layer, and single neuron for the output
