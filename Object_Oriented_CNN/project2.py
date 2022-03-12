@@ -172,7 +172,7 @@ class Neuron:
         else:
             for i in range(self.input_num):
                 self.weights[0][i] -= self.lr * self.d * self.input[0][i]
-            print(self.bias)
+            #print(self.bias)
             self.bias -= self.lr * self.d
 
         return
