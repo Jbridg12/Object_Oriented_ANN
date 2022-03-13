@@ -253,7 +253,7 @@ class MaxPoolingLayer:
         self.outputShape = (self.outputX, self.outputY, inputShape[2])
         self.numberOfNeurons = self.outputX * self.outputY
 
-        print(self.outputShape)
+        #print(self.inputShape)
         # Store coordinates in a matrix for backpropogation
         # self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
         self.coord0 = np.empty((self.inputShape[2], self.inputShape[1], self.inputShape[0]))
@@ -264,7 +264,7 @@ class MaxPoolingLayer:
         # Create output matrix
         out = np.empty((self.inputShape[2], self.outputY, self.outputX))
 
-        print(input)
+        #print(input)
         # Determine the amount of strides needed
         move = int(self.inputShape[0] / self.sizeOfKernel)
         #move = (self.inputShape[0] - self.sizeOfKernel) + 1
@@ -297,14 +297,14 @@ class MaxPoolingLayer:
                     self.coord2[k][i][j] = int(max_coords[2])
                     # self.coords[k][i][j] = max_coords
         
-        print(out)
+        #print(out)
         return out
 
     def calcwdeltas(self, wtimesdelta):
         # Create output matrix
         out = np.zeros((self.inputShape[2], self.inputShape[0], self.inputShape[0]))
-
-        move = int((self.inputShape[0] / self.sizeOfKernel) + 1)
+        move = int(self.inputShape[0] / self.sizeOfKernel)
+        #move = int((self.inputShape[0] / self.sizeOfKernel) + 1)
 
         for k in range(self.inputShape[2]):
             for j in range(move):
@@ -313,7 +313,8 @@ class MaxPoolingLayer:
                     for y in range(self.sizeOfKernel):
                         for x in range(self.sizeOfKernel):
                             coord = (self.coord0[k][j][i], self.coord1[k][j][i], self.coord2[k][j][i])
-                            out[int(coord[0])][int(coord[1])][int(coord[2])] = wtimesdelta[k][j-y][i-x]
+                            #out[int(coord[0])][int(coord[1])][int(coord[2])] = wtimesdelta[k][j-y][i-x]
+                            out[int(coord[0])][int(coord[1])][int(coord[2])] = wtimesdelta[k][j][i]
         return out
 
 class ConvolutionalLayer:
