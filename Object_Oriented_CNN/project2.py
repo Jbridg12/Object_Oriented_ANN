@@ -136,8 +136,8 @@ class Neuron:
             new_wd = np.empty((self.input_num))
 
             for i in range(self.input_num):
-                    print(f'WEIGHTS: {self.weights[0][i]}')
-                    print(f'DELTAS: {curr_delta}')
+                    # print(f'WEIGHTS: {self.weights[0][i]}')
+                    # print(f'DELTAS: {curr_delta}')
                     new_wd[i] = self.weights[0][i] * curr_delta
 
             '''
@@ -229,7 +229,12 @@ class FullyConnected:
             else:
                 sum_wdelta = np.add(sum_wdelta, new_wd) # Otherwise add vectors and keep a running sum
 
+        print(f'\nfully connected weights:')
+        print(self.neurons[0].weights)
+
+        print(f'\nfully connected bias')
         print(self.neurons[0].bias)
+
         return sum_wdelta
 
 class MaxPoolingLayer:
@@ -414,11 +419,18 @@ class ConvolutionalLayer:
                             for col in range(self.sizeOfKernels):
                                 self.neurons[k][i][j].weights[ch][row][col] -= weight_sum[ch][row][col]
 
-        print(self.neurons[0][0][0].weights)
-        print(self.neurons[0][0][0].bias)
-        if(self.numberOfKernels == 2):
-            print(self.neurons[1][0][0].weights)
-            print(self.neurons[1][0][0].bias)
+        for kern in range(self.numberOfKernels):
+            print(f'\nconvolutional layer, kernel {kern} weights:')
+            print(self.neurons[kern][0][0].weights)
+
+            print(f'\nconvolutional layer, kernel {kern} bias:')
+            print(self.neurons[kern][0][0].bias)
+
+        # print(self.neurons[0][0][0].weights)
+        # print(self.neurons[0][0][0].bias)
+        # if(self.numberOfKernels == 2):
+        #     print(self.neurons[1][0][0].weights)
+        #     print(self.neurons[1][0][0].bias)
 
         return out
 
@@ -450,7 +462,7 @@ class FlattenLayer:
         return np.array([flat])
 
     def calcwdeltas(self, wtimesdelta):
-        print(f'FLATTEN INPUT SIZE: {self.inputSize}')
+        # print(f'FLATTEN INPUT SIZE: {self.inputSize}')
         out_wd = np.empty((self.inputSize[2], self.inputSize[0], self.inputSize[1]))
         #print(out_wd.shape)
         #print(self.inputSize)
@@ -460,7 +472,7 @@ class FlattenLayer:
                 for i in range(self.inputSize[1]):
                     wtd_index = (k*self.inputSize[1]*self.inputSize[0]) + j*self.inputSize[0] + i
                     out_wd[k][j][i] = wtimesdelta[wtd_index]
-        #print(out_wd)
+
         return out_wd
 
 
@@ -586,18 +598,20 @@ class NeuralNetwork:
 
         y_test = self.calculate(x)      # One forward pass
 
-        print(y_test)
+        print(f'\nmodel output before: {y_test}')
         wtimesdelta = self.lossderiv(y_test, y)  # Save partial derivative of the loss as first w times delta
         print(f'Calc loss: {self.calculateloss(y_test,y)}')
 
+        print(f'\n\nWeights after backpropagation.')
         for i in range(numOfLayers):
-            print(f'Layer: {numOfLayers-i}')
+            # print(f'\nLayer: {numOfLayers-i}')
             curr_layer = numOfLayers - 1 - i       # Calc index for moving backwards
             wtimesdelta = self.layers[curr_layer].calcwdeltas(wtimesdelta)
+            # print(wtimesdelta)
             #print(wtimesdelta)
         
         new_y_test = self.calculate(x)
-        print(y_test)
+        # print(y_test)
         calc_loss = self.calculateloss(new_y_test, y)
 
         return new_y_test, calc_loss
@@ -710,7 +724,7 @@ if __name__ == "__main__":
         print('Invalid input')
 
     elif sys.argv[1] == 'example1':
-        print('Run example1.')
+        print('Run example1.\n')
 
         NN = NeuralNetwork(5, MSE, 100)
         print('Initialized')
@@ -721,11 +735,11 @@ if __name__ == "__main__":
                     biases=fc_bias)
 
         output, loss = NN.train(x, y)
-        print(f'OUTPUT: {output}')
-        print(f'LOSS: {loss}')
+        print(f'\nOUTPUT: {output}')
+        # print(f'LOSS: {loss}')
 
     elif sys.argv[1] == 'example2':
-        print('Run example2.')
+        print('Run example2.\n')
         # fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394]]])
         # fc_bias = 0.32551163
 
@@ -740,11 +754,11 @@ if __name__ == "__main__":
         NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights, biases = fc_bias)
 
         output, loss = NN.train(x, y)
-        print(f'OUTPUT: {output}')
-        print(f'LOSS: {loss}')
+        print(f'\nOUTPUT: {output}')
+        # print(f'LOSS: {loss}')
 
     elif sys.argv[1] == 'example3':
-        print('Run example3.')
+        print('Run example3.\n')
 
         x = np.array([[[0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303,  0.03995921, 0.42949218, 0.31492687],
                        [0.63649114, 0.34634715, 0.04309736, 0.87991517, 0.76324059, 0.87809664, 0.41750914, 0.60557756],
@@ -766,7 +780,7 @@ if __name__ == "__main__":
 
         fc_bias = 0.565507
 
-        NN = NeuralNetwork(8, MSE, 1)
+        NN = NeuralNetwork(8, MSE, 100)
         print('Initialized')
         NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights,
                     biases=conv1_biases)
@@ -775,6 +789,6 @@ if __name__ == "__main__":
         NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights,
                     biases=fc_bias)
 
-        print()
-        print('Let the training COMMENCE!!!')
         output, loss = NN.train(x, y)
+        print(f'\nOUTPUT: {output}')
+        # print(f'LOSS: {loss}')
