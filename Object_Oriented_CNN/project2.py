@@ -99,7 +99,7 @@ class Neuron:
 
         net += self.bias
         # print()
-        #print(self.weights)
+        # print(self.weights)
         # print()
         #print(net)
         # print(self.activate(net))
@@ -249,51 +249,62 @@ class MaxPoolingLayer:
         self.numberOfNeurons = self.outputX * self.outputY
 
         # Store coordinates in a matrix for backpropogation
-        self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
+        # self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
+        self.coord0 = np.empty((self.inputShape[2], self.inputShape[1], self.inputShape[0]))
+        self.coord1 = np.empty((self.inputShape[2], self.inputShape[1], self.inputShape[0]))
+        self.coord2 = np.empty((self.inputShape[2], self.inputShape[1], self.inputShape[0]))
 
     def calculate(self, input):
         # Create output matrix
-        out = np.empty((self.inputShape[2], self.sizeOfKernel, self.sizeOfKernel))
+        out = np.empty((self.inputShape[2], self.outputY, self.outputX))
 
         # Determine the amount of strides needed
-        move = int(self.inputShape[0] / self.sizeOfKernel)
+        # move = int(self.inputShape[0] / self.sizeOfKernel)
+        move = (self.inputShape[0] - self.sizeOfKernel) + 1
 
         # For each channel
         for k in range(self.inputShape[2]):
+
             # Go over each section by row x column
             for i in range(move):
                 for j in range(move):
-
                     max = -100  # Arbitrary small value
                     max_coords = None 
 
                     # Loop through each element of the smaller sections
                     for y in range(self.sizeOfKernel):
                         for x in range(self.sizeOfKernel):
-
                             # Find the max and store coordinates
-                            if input[k][y+(i*move)][x+(j*move)] > max:
-                                max = input[k][y+(i*move)][x+(j*move)]
-                                max_coords = np.array([k, y+(i*move), x+(j*move)])
-                                print(f'Coord: {max_coords[0]}, {max_coords[1]}, {max_coords[2]}')
+                            # if input[k][y+(i*move)][x+(j*move)] > max:
+                            if input[k][y+i][x+j] > max:
+                                max = input[k][y+i][x+j]
+                                max_coords = [k, y+i, x+j]
+                            #     max = input[k][y+(i*move)][x+(j*move)]
+                            #     max_coords = np.array([k, y+(i*move), x+(j*move)])
+                            #     print(f'Coord: {max_coords[0]}, {max_coords[1]}, {max_coords[2]}')
 
                     out[k][i][j] = max   # Store max in output
-                    # self.coords[k][i][j] = max_coords[0]
-                    # self.coords[k][i][j] = max_coords[1]
-                    # self.coords[k][i][j] = max_coords[2]
-                    # self.coords[k][i][j] = np.array(max_coords, dtype=object)  # Store coordinates in
+                    # print(max_coords)
+                    self.coord0[k][i][j] = int(max_coords[0])
+                    self.coord1[k][i][j] = int(max_coords[1])
+                    self.coord2[k][i][j] = int(max_coords[2])
+                    # self.coords[k][i][j] = max_coords
         return out
 
-    def calculatewdeltas(self, wtimesdelta):
+    def calcwdeltas(self, wtimesdelta):
         # Create output matrix
-        out = np.zeroes(self.inputShape)
+        out = np.zeros((self.inputShape[2], self.inputShape[0], self.inputShape[0]))
+
+        move = int((self.inputShape[0] / self.sizeOfKernel) + 1)
 
         for k in range(self.inputShape[2]):
-            for x in range(self.sizeOfKernel):
-                for y in range(self.sizeOfKernel):
-
-                    coord = self.coords[k][x][y]
-                    out[coord[0]][coord[1]][coord[2]] = wtimesdelta[k][x][y]
+            for j in range(move):
+                for i in range(move):
+                    # coord = self.coords[k][x][y]
+                    for y in range(self.sizeOfKernel):
+                        for x in range(self.sizeOfKernel):
+                            coord = (self.coord0[k][j][i], self.coord1[k][j][i], self.coord2[k][j][i])
+                            out[int(coord[0])][int(coord[1])][int(coord[2])] = wtimesdelta[k][j-y][i-x]
         return out
 
 class ConvolutionalLayer:
@@ -439,6 +450,7 @@ class FlattenLayer:
         return np.array([flat])
 
     def calcwdeltas(self, wtimesdelta):
+        print(f'FLATTEN INPUT SIZE: {self.inputSize}')
         out_wd = np.empty((self.inputSize[2], self.inputSize[0], self.inputSize[1]))
         #print(out_wd.shape)
         #print(self.inputSize)
@@ -523,7 +535,7 @@ class NeuralNetwork:
     def calculate(self, input):
         self.input = input   # Store list of inputs
         nextInput = self.input
-        
+
         for layer in self.layers:
             nextInput = layer.calculate(nextInput)  # Store output of each layer as input into next layer
 
@@ -745,6 +757,15 @@ if __name__ == "__main__":
 
         y = np.array([0.04862801])
 
+        fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394,
+                      0.32551, 0.16502, 0.39253, 0.09346, 0.82111, 0.15115, 0.38411, 0.94426, 0.98763,
+                      0.4563, 0.82612, 0.25137, 0.59737, 0.90283, 0.53456, 0.5902, 0.03928, 0.35718,
+                      0.07961, 0.30546, 0.33072, 0.77383, 0.03996, 0.42949, 0.31493, 0.63649, 0.34635,
+                      0.0431, 0.87992, 0.76324, 0.8781, 0.41751, 0.60558, 0.51347, 0.59784, 0.26222,
+                      0.30087, 0.0254, 0.30306, 0.24208, 0.55758]]])
+
+        fc_bias = 0.565507
+
         NN = NeuralNetwork(8, MSE, 1)
         print('Initialized')
         NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights,
@@ -754,4 +775,6 @@ if __name__ == "__main__":
         NN.addLayer(layerType="FullyConnected", numberOfNeurons=1, activation=SIGMOID, weights=fc_weights,
                     biases=fc_bias)
 
+        print()
+        print('Let the training COMMENCE!!!')
         output, loss = NN.train(x, y)

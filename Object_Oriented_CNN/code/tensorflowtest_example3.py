@@ -9,7 +9,7 @@ from parameters_ex3 import generateExample3
 model=Sequential()
 
 # Add convolutional layers, flatten, and fully connected layer
-model.add(layers.Conv2D(1,3,input_shape=(8,8,1),activation='sigmoid'))
+model.add(layers.Conv2D(2,3,input_shape=(8,8,1),activation='sigmoid'))
 model.add(layers.MaxPool2D((2,2), strides=(1,1), padding='valid'))
 model.add(layers.Flatten())
 model.add(layers.Dense(1,activation='sigmoid'))
@@ -22,13 +22,13 @@ print(f'W1: {l1k1}')
 
 #setting weights and bias of first layer.
 l1k1=l1k1.reshape(3,3,1,1)
-# l1k2=l1k2.reshape(3,3,1,1)
+l1k2=l1k2.reshape(3,3,1,1)
 
-w1 = l1k1
+# w1 = l1k1
 print(f'B1: {np.array([l1b1[0]])}')
 # print(l1k1)
-# w1=np.concatenate((l1k1),axis=1)
-model.layers[0].set_weights([w1,np.array([l1b1[0]])]) #Shape of weight matrix is (w,h,input_channels,kernels)
+w1=np.concatenate((l1k1,l1k2),axis=3)
+model.layers[0].set_weights([w1,np.array([l1b1[0],l1b2[0]])]) #Shape of weight matrix is (w,h,input_channels,kernels)
 # model.layers[1].set_weights()
 
 #setting weights and bias of second layer.
@@ -63,7 +63,7 @@ print()
 np.set_printoptions(precision=5)
 print('model output before:')
 print(model.predict(img))
-sgd = optimizers.SGD(learning_rate=1)
+sgd = optimizers.SGD(learning_rate=100)
 model.compile(loss='MSE', optimizer=sgd, metrics=['accuracy'])
 history=model.fit(img,output,batch_size=1,epochs=1)
 print('\nmodel output after:')
@@ -74,16 +74,16 @@ print(np.squeeze(model.get_weights()[0][:,:,0,0]))
 print('\n1st convolutional layer, 1st kernel bias:')
 print(np.squeeze(model.get_weights()[1][0]))
 
-# print('\n1st convolutional layer, 2nd kernel weights:')
-# print(np.squeeze(model.get_weights()[0][:,:,0,1]))
-# print('\n1st convolutional layer, 2nd kernel bias:')
-# print(np.squeeze(model.get_weights()[1][1]))
-
+print('\n1st convolutional layer, 2nd kernel weights:')
+print(np.squeeze(model.get_weights()[0][:,:,0,1]))
+print('\n1st convolutional layer, 2nd kernel bias:')
+print(np.squeeze(model.get_weights()[1][1]))
 
 print('\nMax Pool layer weights:')
+print('None')
 # print(np.squeeze(model.get_weights()[1][:,:,0,0]))
 # print(np.squeeze(model.get_weights()[1][:,:,1,0]))
-print(np.squeeze(model.get_weights()[1]))
+# print(np.squeeze(model.get_weights()[1]))
 
 print('\nfully connected layer weights:')
 print(np.squeeze(model.get_weights()[2]))
