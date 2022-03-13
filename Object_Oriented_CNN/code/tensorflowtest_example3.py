@@ -10,7 +10,8 @@ model=Sequential()
 
 # Add convolutional layers, flatten, and fully connected layer
 model.add(layers.Conv2D(2,3,input_shape=(8,8,1),activation='sigmoid'))
-model.add(layers.MaxPool2D((2,2), strides=(1,1), padding='valid'))
+#model.add(layers.MaxPool2D((2,2), strides=(1,1), padding='valid'))
+model.add(layers.MaxPool2D((2,2), padding='valid'))
 model.add(layers.Flatten())
 model.add(layers.Dense(1,activation='sigmoid'))
 
@@ -58,6 +59,11 @@ print()
 print('output:')
 print(output)
 print()
+
+# Inserted by Josh
+model_output = model.layers[0].output
+m = keras.Model(inputs=model.input, outputs=model_output)
+print(m.predict(img))
 
 #print needed values.
 np.set_printoptions(precision=5)

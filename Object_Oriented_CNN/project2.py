@@ -247,12 +247,13 @@ class MaxPoolingLayer:
         self.sizeOfKernel = sizeOfKernel
         self.inputShape = inputShape
 
-        self.outputX = inputShape[0] - sizeOfKernel + 1
-        self.outputY = inputShape[1] - sizeOfKernel + 1
+        self.outputX = int(((inputShape[0] - sizeOfKernel) / sizeOfKernel) + 1)
+        self.outputY = int(((inputShape[1] - sizeOfKernel) / sizeOfKernel) + 1)
 
         self.outputShape = (self.outputX, self.outputY, inputShape[2])
         self.numberOfNeurons = self.outputX * self.outputY
 
+        print(self.outputShape)
         # Store coordinates in a matrix for backpropogation
         # self.coords = np.empty((self.sizeOfKernel, self.sizeOfKernel, self.inputShape[2]))
         self.coord0 = np.empty((self.inputShape[2], self.inputShape[1], self.inputShape[0]))
@@ -263,9 +264,10 @@ class MaxPoolingLayer:
         # Create output matrix
         out = np.empty((self.inputShape[2], self.outputY, self.outputX))
 
+        print(input)
         # Determine the amount of strides needed
-        # move = int(self.inputShape[0] / self.sizeOfKernel)
-        move = (self.inputShape[0] - self.sizeOfKernel) + 1
+        move = int(self.inputShape[0] / self.sizeOfKernel)
+        #move = (self.inputShape[0] - self.sizeOfKernel) + 1
 
         # For each channel
         for k in range(self.inputShape[2]):
@@ -280,12 +282,12 @@ class MaxPoolingLayer:
                     for y in range(self.sizeOfKernel):
                         for x in range(self.sizeOfKernel):
                             # Find the max and store coordinates
-                            # if input[k][y+(i*move)][x+(j*move)] > max:
-                            if input[k][y+i][x+j] > max:
-                                max = input[k][y+i][x+j]
-                                max_coords = [k, y+i, x+j]
-                            #     max = input[k][y+(i*move)][x+(j*move)]
-                            #     max_coords = np.array([k, y+(i*move), x+(j*move)])
+                            if input[k][y+(i*self.sizeOfKernel)][x+(j*self.sizeOfKernel)] > max:
+                            #if input[k][y+i][x+j] > max:
+                                #max = input[k][y+i][x+j]
+                                #max_coords = [k, y+i, x+j]
+                                 max = input[k][y+(i*self.sizeOfKernel)][x+(j*self.sizeOfKernel)]
+                                 max_coords = np.array([k, y+(i*self.sizeOfKernel), x+(j*self.sizeOfKernel)])
                             #     print(f'Coord: {max_coords[0]}, {max_coords[1]}, {max_coords[2]}')
 
                     out[k][i][j] = max   # Store max in output
@@ -294,6 +296,8 @@ class MaxPoolingLayer:
                     self.coord1[k][i][j] = int(max_coords[1])
                     self.coord2[k][i][j] = int(max_coords[2])
                     # self.coords[k][i][j] = max_coords
+        
+        print(out)
         return out
 
     def calcwdeltas(self, wtimesdelta):
@@ -347,6 +351,7 @@ class ConvolutionalLayer:
         self.neurons = np.empty((numberOfKernels, self.outputX, self.outputY), dtype=Neuron)
         # print(self.neurons.shape)
         #print(self.weights)
+        #print(self.outputShape)
         for k in range(numberOfKernels):
             for i in range(self.outputX):
                 for j in range(self.outputY):
@@ -760,6 +765,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'example3':
         print('Run example3.\n')
 
+        '''
         x = np.array([[[0.35718176, 0.07961309, 0.30545992, 0.33071931, 0.7738303,  0.03995921, 0.42949218, 0.31492687],
                        [0.63649114, 0.34634715, 0.04309736, 0.87991517, 0.76324059, 0.87809664, 0.41750914, 0.60557756],
                        [0.51346663, 0.59783665, 0.26221566, 0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819],
@@ -770,16 +776,33 @@ if __name__ == "__main__":
                        [0.75249617, 0.10687958, 0.74460324, 0.46978529, 0.59825567, 0.14762019, 0.18403482, 0.64507213]]])
 
         y = np.array([0.04862801])
+        '''
 
+        x = np.array([[[0.82612284, 0.25137413, 0.59737165, 0.90283176, 0.53455795,  0.59020136, 0.03928177, 0.35718176],
+                       [0.07961309, 0.30545992, 0.33071931, 0.7738303, 0.03995921, 0.42949218, 0.31492687, 0.63649114],
+                       [0.34634715, 0.04309736, 0.87991517, 0.76324059, 0.87809664, 0.41750914, 0.60557756, 0.51346663],
+                       [0.59783665, 0.26221566, 0.30087131, 0.02539978, 0.30306256, 0.24207588, 0.55757819, 0.56550702],
+                       [0.47513225, 0.29279798, 0.06425106, 0.97881915, 0.33970784, 0.49504863, 0.97708073, 0.44077382],
+                       [0.31827281, 0.51979699, 0.57813643, 0.85393375, 0.06809727, 0.46453081, 0.78194912, 0.71860281],
+                       [0.58602198, 0.03709441, 0.35065639, 0.56319068, 0.29972987, 0.51233415, 0.67346693, 0.15919373],
+                       [0.05047767, 0.33781589, 0.10806377, 0.17890281, 0.8858271, 0.36536497, 0.21876935, 0.75249617]]])
+
+        y = np.array([0.10687958])
+
+
+        '''
         fc_weights = np.array([[[0.62629, 0.54759, 0.81929, 0.19895, 0.85685, 0.35165, 0.75465, 0.29596, 0.88394,
                       0.32551, 0.16502, 0.39253, 0.09346, 0.82111, 0.15115, 0.38411, 0.94426, 0.98763,
                       0.4563, 0.82612, 0.25137, 0.59737, 0.90283, 0.53456, 0.5902, 0.03928, 0.35718,
                       0.07961, 0.30546, 0.33072, 0.77383, 0.03996, 0.42949, 0.31493, 0.63649, 0.34635,
                       0.0431, 0.87992, 0.76324, 0.8781, 0.41751, 0.60558, 0.51347, 0.59784, 0.26222,
                       0.30087, 0.0254, 0.30306, 0.24208, 0.55758]]])
-
-        fc_bias = 0.565507
-
+        '''
+        fc_weights = np.array([[[0.62628715, 0.54758616, 0.819287, 0.19894754, 0.8568503, 0.35165264,
+                                 0.75464769, 0.29596171, 0.88393648, 0.32551164, 0.1650159, 0.39252924,
+                                 0.09346037, 0.82110566, 0.15115202, 0.38411445, 0.94426071, 0.98762547]]])
+        #fc_bias = 0.565507
+        fc_bias = 0.45630455
         NN = NeuralNetwork(8, MSE, 100)
         print('Initialized')
         NN.addLayer(layerType="Conv", numberOfKernels=2, sizeOfKernels=3, activation=SIGMOID, weights=conv1_weights,
