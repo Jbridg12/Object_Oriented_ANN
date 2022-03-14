@@ -100,10 +100,6 @@ class Neuron:
         curr_delta = wtimesdelta * self.activationderivative()
         self.d = curr_delta
 
-        """for i in range(self.input_num + 1):
-            print(f'WEIGHTS: {self.weights}')
-            print(f'DELTAS: {curr_delta}')
-            new_wd.append(self.weights[i] * curr_delta)"""
         if mode == 'Convolution' or mode == 'convolution':
             new_wd = np.empty((self.in_channels, self.weights.shape[1], self.weights.shape[2]))
             for ch in range(self.in_channels):
@@ -116,15 +112,6 @@ class Neuron:
             for i in range(self.input_num):
                     new_wd[i] = self.weights[0][i] * curr_delta
 
-            '''
-            for ch in range(self.in_channels):
-                print(f'WEIGHTS: {w}')
-                print()
-                for i in range(self.input_num):
-                    print(f'WEIGHTS: {w[i]}')
-                    print(f'DELTAS: {curr_delta}')
-                    new_wd.append(w[i] * curr_delta)
-            '''
         return new_wd
     
     # Simply update the weights using the partial derivatives and the learning weight
