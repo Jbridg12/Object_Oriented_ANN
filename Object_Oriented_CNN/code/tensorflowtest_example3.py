@@ -87,9 +87,6 @@ print(np.squeeze(model.get_weights()[1][1]))
 
 print('\nMax Pool layer weights:')
 print('None')
-# print(np.squeeze(model.get_weights()[1][:,:,0,0]))
-# print(np.squeeze(model.get_weights()[1][:,:,1,0]))
-# print(np.squeeze(model.get_weights()[1]))
 
 print('\nfully connected layer weights:')
 print(np.squeeze(model.get_weights()[2]))
