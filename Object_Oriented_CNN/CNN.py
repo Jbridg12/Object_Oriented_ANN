@@ -1,7 +1,7 @@
 import numpy as np
 # from project2 import Neuron
 
-
+# Layer performing convolutions on the input 
 class ConvolutionalLayer:
     def __init__(self, numberOfKernels, sizeOfKernels, activation, inputShape, lr, weights=None):
         """
@@ -65,7 +65,7 @@ class ConvolutionalLayer:
     def calculatewdeltas(self, wtimesdelta):
         return
 
-
+# Pooling layer reducing dimensionality
 class MaxPoolingLayer:
     def __init__(self, sizeOfKernel, inputShape):
         """
@@ -125,7 +125,7 @@ class MaxPoolingLayer:
                     out[coord[0]][coord[1]][coord[2]] = wtimesdelta[x][y][k]
         return
 
-
+# Flatten layer resutructuring output into one dimension
 class FlattenLayer:
     def __init__(self, inputSize):
         self.inputSize = inputSize
